@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'rest_framework',
+    'api',
     'frontend',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -119,3 +121,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+REDIS_HOST = 'localhost'
+REDIS_PORT = 6379
