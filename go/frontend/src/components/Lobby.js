@@ -11,7 +11,7 @@ class GameInLobby extends Component {
   }
 
   render() {
-    return <Link to={`/game/${this.props.id}`}>{this.props.info.name}</Link>;
+    return <Link to={`/game/${this.props.info.code}`}>{this.props.info.code}</Link>;
   }
 }
 
@@ -19,19 +19,20 @@ export default class Lobby extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      games: [
-        {
-          id: 123456,
-          name: "De ja vu",
-        },
-        {
-          id: 234567,
-          name: "Kurby",
-        },
-      ],
+      games: [],
     };
   }
 
+  componentDidMount(){
+    fetch("/api/games").then((res) => res.json()).then((data) => {
+      console.log("Data: " + data);
+      this.setState({
+        games: data,
+      });
+      console.log(this.state.games);
+    });
+  }
+  
   render() {
     const games = this.state.games.slice();
     // can turn into another react component
@@ -55,10 +56,8 @@ export default class Lobby extends Component {
             </Grid>
           </Grid>
           <Switch>
-            <Route path="/create-game">
-              <CreateGame />
-            </Route>
-            <Route path="/join-game"><JoinGame /></Route>
+            <Route path="/create-game" render={() => <CreateGame {...this.props} />}></Route>
+            <Route path="/join-game" render={() => <JoinGame {...this.props} />}></Route>
             <Route path="/spectate-game"><SpectateGame/></Route>
           </Switch>
         </Router>

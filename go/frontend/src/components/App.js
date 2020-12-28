@@ -24,8 +24,7 @@ export default class App extends Component {
         <Switch>
           <Route path="/game/:id" render={(props) => <Game {...props} leaveGameCallback={() => this.leaveGame()}/>}>
           </Route>
-          <Route path="/">
-            <Lobby />
+          <Route path="/" render={(props) => <Lobby {...props} />}>
           </Route>
         </Switch>
       </Router>

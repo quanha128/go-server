@@ -9,6 +9,7 @@ import {
   FormLabel,
   Checkbox,
   FormGroup,
+  Button,
 } from "@material-ui/core";
 
 export default class CreateGame extends Component {
@@ -33,6 +34,23 @@ export default class CreateGame extends Component {
     });
   }
 
+  createGameButtonPressed(){
+    const requestOptions = {
+      method: "POST",
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        game_name: this.state.gameName,
+        have_password: this.state.have_password,
+        password: this.state.password,
+        board_size: 19,
+        can_spectate: true,
+      }),
+    };
+    fetch("/api/create-game", requestOptions).then((res) => res.json()).then((data) => {
+      this.props.history.push(`/game/${data.code}`);
+    })
+  }
+
   render() {
     return (
       <Grid container spacing={0}>
@@ -43,9 +61,9 @@ export default class CreateGame extends Component {
           <FormControl component="fieldset">
             <InputLabel>Room name</InputLabel>
             <Input
-              placeholder="Type your room name"
+              placeholder="Type your game name"
               required
-              name="roomName"
+              name="gameName"
               onChange={(e) => this.changeInputField(e)}
             ></Input>
           </FormControl>
@@ -65,6 +83,11 @@ export default class CreateGame extends Component {
               onChange={(e) => this.changeInputField(e)}
             ></Input>
           </FormControl>
+        </Grid>
+        <Grid item xs={12} align="center">
+          <Button color="secondary" variant="contained" onClick={() => this.createGameButtonPressed()}>
+            Create new game
+          </Button>
         </Grid>
       </Grid>
     );

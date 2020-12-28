@@ -37,7 +37,7 @@ class JoinGame(APIView):
     lookup_url_kwarg = 'code'
 
     def post(self, request, format=None):
-        code = request.POST.get(self.lookup_url_kwarg)
+        code = request.data.get(self.lookup_url_kwarg)
         if code != None:
             game = Game.objects.filter(code=code)
             if len(game) > 0:
@@ -61,6 +61,7 @@ class CreateGameView(APIView):
             board_state = "."*(board_size*board_size)
             can_spectate = serializer.data.get('can_spectate')
             board_state = "." * (board_size**2)
+            
             host = self.request.session.session_key
             queryset = Game.objects.filter(host=host)
             if queryset.exists():
