@@ -3,11 +3,7 @@ from django.conf import settings
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-<<<<<<< HEAD
 from .models import Game
-=======
-from .models import *
->>>>>>> 2e9d54be9832a80cc6b69fa4c50a8caa39df1147
 from .serial import GameSerializer, CreateGameSerializer
 
 # Create your views here.

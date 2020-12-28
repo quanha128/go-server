@@ -121,7 +121,6 @@ export default class Game extends Component {
       blackPlayer: "game_id2",
       chatLog: [],
     };
-    // this.onPlayerMove = this.onPlayerMove.bind(this);
   }
 
   componentDidMount() {
