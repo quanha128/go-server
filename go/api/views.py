@@ -58,6 +58,7 @@ class CreateGameView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             board_size = serializer.data.get('board_size')
+            board_state = "."*(board_size*board_size)
             can_spectate = serializer.data.get('can_spectate')
             host = self.request.session.session_key
             queryset = Game.objects.filter(host=host)
@@ -65,10 +66,10 @@ class CreateGameView(APIView):
                 game = queryset[0]
                 game.can_spectate = can_spectate
                 # game.board_size = board_size
-                game.save(update_fields=['can_spectate', 'board_size'])
+                game.save(update_fields=['can_spectate'])
                 return Response(GameSerializer(game).data, status=status.HTTP_200_OK)
             else:
-                game = Game(host=host, can_spectate=can_spectate, board_size=board_size)
+                game = Game(host=host, can_spectate=can_spectate, board_size=board_size, board_state=board_state)
                 game.save()
                 return Response(GameSerializer(game).data, status=status.HTTP_201_CREATED)
 

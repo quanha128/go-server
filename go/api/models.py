@@ -27,6 +27,7 @@ class Game(models.Model):
     #         models.CharField(null=False, default=".", max_length=1),
     #         size=19*19,
     #     )
+    board_state = models.CharField(default="", max_length=19*19)
     code = models.CharField(default=generate_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
     can_spectate = models.BooleanField(default=False, null=False)
