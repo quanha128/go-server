@@ -3,7 +3,11 @@ from django.conf import settings
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+<<<<<<< HEAD
 from .models import Game
+=======
+from .models import *
+>>>>>>> 2e9d54be9832a80cc6b69fa4c50a8caa39df1147
 from .serial import GameSerializer, CreateGameSerializer
 
 # Create your views here.
@@ -58,6 +62,7 @@ class CreateGameView(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             board_size = serializer.data.get('board_size')
+            board_state = "."*(board_size*board_size)
             can_spectate = serializer.data.get('can_spectate')
             board_state = "." * (board_size**2)
             host = self.request.session.session_key
