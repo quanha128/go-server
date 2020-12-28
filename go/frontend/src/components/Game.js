@@ -34,7 +34,6 @@ const positionImage = {
   [positionConst.UP | positionConst.RIGHT]: "Ebr.png",
   [positionConst.DOT]: ",.png",
 };
-console.log(positionImage);
 
 const EMPTY = ".";
 const WHITE = "w";
@@ -180,7 +179,7 @@ class Board extends Component {
 export default class Game extends Component {
   constructor(props) {
     super(props);
-    this.gameId = this.props.match.params.id;
+    this.gameCode = this.props.match.params.code;
     this.state = {
       boardSize: 19,
       boardArray: Array(19 * 19).fill(EMPTY),
@@ -195,22 +194,36 @@ export default class Game extends Component {
   componentDidMount() {
     /* fetch id of player here */
     // update isTurn, whitePlayer, blackPlayer, size
+    fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
+      console.log(data);
+      this.setState({
+        boardArray: data.board_state.split(''),
+      });
+    });
   }
 
   onPlayerMove(idx) {
-    
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
     if (boardArray[idx] == EMPTY || boardArray[idx] == WHITE_GHOST || boardArray[idx] == BLACK_GHOST) {
-      console.log("At " + idx);
       boardArray[idx] = isWhite === true ? WHITE : BLACK;
-      console.log(boardArray[idx]);
       // fetch api here to update board state
-      this.setState({
-        lastHover: null,
-        isWhite: isWhite == true ? false : true,
-        boardArray: boardArray,
-      });
+      const requestOptions = {
+        method: "POST",
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          board_state: boardArray.join(''),
+          code: this.gameCode,
+        })
+      };
+      fetch("/api/update-game", requestOptions).then((res) => (res).json()).then((data) => {
+        console.log(data);
+        this.setState({
+          lastHover: null,
+          isWhite: isWhite == true ? false : true,
+          boardArray: data.board_state.split(''),
+        });
+      })
     }
   }
 

@@ -56,8 +56,8 @@ export default class Lobby extends Component {
             </Grid>
           </Grid>
           <Switch>
-            <Route path="/create-game" render={() => <CreateGame {...this.props} />}></Route>
-            <Route path="/join-game" render={() => <JoinGame {...this.props} />}></Route>
+            <Route path="/create-game" render={() => <CreateGame {...this.props} joinGameCallback={(gameCode) => this.joinGameCallback(gameCode)}/>}></Route>
+            <Route path="/join-game" render={() => <JoinGame {...this.props} joinGameCallback={(gameCode) => this.joinGameCallback(gameCode)}/>}></Route>
             <Route path="/spectate-game"><SpectateGame/></Route>
           </Switch>
         </Router>

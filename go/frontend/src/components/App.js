@@ -15,16 +15,23 @@ export default class App extends Component {
   leaveGame(){
     this.setState({
       gameId: "",
-    })
+    });
+  }
+
+  joinGame(gameCode){
+    this.setState({
+      gameId: gameCode,
+    });
+    // check if game is still up
   }
 
   render() {
     return (
       <Router>
         <Switch>
-          <Route path="/game/:id" render={(props) => <Game {...props} leaveGameCallback={() => this.leaveGame()}/>}>
+          <Route path="/game/:code" render={(props) => <Game {...props} leaveGameCallback={() => this.leaveGame()}/>}>
           </Route>
-          <Route path="/" render={(props) => <Lobby {...props} />}>
+          <Route path="/" render={(props) => <Lobby {...props} joinGameCallback={() => this.joinGame()} />}>
           </Route>
         </Switch>
       </Router>
