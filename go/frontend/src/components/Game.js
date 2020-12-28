@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import ChatLog from "./ChatLog";
+import Chat from "./Chat";
 import {
   FormControl,
   TextField,
@@ -119,6 +119,7 @@ export default class Game extends Component {
       isTurn: true,
       whitePlayer: "game_id1",
       blackPlayer: "game_id2",
+      chatLog: [],
     };
     // this.onPlayerMove = this.onPlayerMove.bind(this);
   }
@@ -130,11 +131,9 @@ export default class Game extends Component {
 
   onPlayerMove(idx) {
     console.log("At " + idx);
-    
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
     if (boardArray[idx] == EMPTY) {
-      
       boardArray[idx] = (isWhite === true ? WHITE : BLACK);
       console.log(boardArray[idx]);
       // fetch api here to update board state
@@ -168,13 +167,7 @@ export default class Game extends Component {
             />
           </Grid>
           <Grid item xs={4}>
-            <ChatLog />
-            <FormControl>
-              <TextField label="Message"></TextField>
-              <FormHelperText id="my-helper-text">
-                Type your message here.
-              </FormHelperText>
-            </FormControl>
+            <Chat chatLog={this.state.chatLog}/>
           </Grid>
         </Grid>
       </div>
