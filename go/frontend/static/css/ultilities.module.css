@@ -1,0 +1,12 @@
+.imgOverlayWrap {
+    position: relative;
+    display: inline-block; /* <= shrinks container to image size */
+    transition: transform 150ms ease-in-out;
+    font-size: 0;
+  }
+  
+  .imgOverlayWrap svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
