@@ -4,7 +4,7 @@ from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import Game
-from .serial import GameSerializer, CreateGameSerializer
+from .serial import GameSerializer, CreateGameSerializer, UpdateGameSerializer
 
 # Create your views here.
 
@@ -32,6 +32,25 @@ class GetGame(APIView):
         
         return Response({'Bad Request': 'Code parameter not found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
+class UpdateGame(APIView):
+    lookup_url_kwarg = 'code'
+
+    def post(self, request, format=None):
+        board_state = request.data.get('board_state')
+        code = request.data.get('code')
+        if code != None:
+            games = Game.objects.filter(code=code)
+            if len(games) > 0:
+                game = games[0]
+                game.board_state = board_state
+                game.save(update_fields=["board_state"])
+                data = GameSerializer(games[0]).data
+                data['is_host'] = self.request.session.session_key == games[0].host
+                return Response(data, status=status.HTTP_200_OK)
+            return Response({'Room Not Found': 'Invalid Room Code.'}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({'Bad Request': 'Code parameter not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
 class JoinGame(APIView):
     serializer_class = GameSerializer
     lookup_url_kwarg = 'code'
@@ -39,10 +58,10 @@ class JoinGame(APIView):
     def post(self, request, format=None):
         code = request.data.get(self.lookup_url_kwarg)
         if code != None:
-            game = Game.objects.filter(code=code)
-            if len(game) > 0:
-                data = GameSerializer(game[0]).data
-                data['is_host'] = self.request.session.session_key == game[0].host
+            games = Game.objects.filter(code=code)
+            if len(games) > 0:
+                data = GameSerializer(games[0]).data
+                data['is_host'] = self.request.session.session_key == games[0].host
                 return Response(data, status=status.HTTP_200_OK)
             return Response({'Room Not Found': 'Invalid Room Code.'}, status=status.HTTP_404_NOT_FOUND)
         
