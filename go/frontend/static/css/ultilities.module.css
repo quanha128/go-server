@@ -32,3 +32,11 @@
   bottom: 0;
   left: 0;
 }
+
+.ghost {
+  opacity: 50%;
+}
+
+.unghost {
+  opacity: 100%;
+}

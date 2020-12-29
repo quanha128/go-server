@@ -3,6 +3,8 @@ from django.db import models
 # from .helper import *
 import string, random
 
+BOARD_SIZE = 19
+
 def generate_code():
     length = 6
     while True:
@@ -27,7 +29,7 @@ class Game(models.Model):
     #         models.CharField(null=False, default=".", max_length=1),
     #         size=19*19,
     #     )
-    board_state = models.CharField(default="", max_length=19*19)
+    board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
     code = models.CharField(default=generate_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
     can_spectate = models.BooleanField(default=False, null=False)
