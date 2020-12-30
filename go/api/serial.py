@@ -5,9 +5,14 @@ class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = (
-            'id', 'board_size', 'code', 'host', 'can_spectate', 'time_start',
+            'id', 'board_size', 'code', 'host', 'can_spectate', 'time_start', 'board_state',
         )
 
+class UpdateGameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = ('code', 'board_state')
+        
 class CreateGameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
