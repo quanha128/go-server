@@ -12,11 +12,11 @@ def generate_game_code():
             break
     return code
 
-def generate_chat_code():
+def generate_chat_channel_code():
     length = 6
     while True:
         code = ''.join(random.choices(string.ascii_letters, k=length))
-        if Chatline.objects.filter(code = code).count() == 0:
+        if Chatline.objects.filter(chat_channel_code=code).count() == 0:
             break
     return code
 
@@ -39,6 +39,7 @@ class Game(models.Model):
     name = models.CharField(default="New Game", max_length=50, null=False)
     board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
     code = models.CharField(default=generate_game_code, unique=True, max_length=6)
+    chat_channel_code = models.CharField(default=generate_chat_channel_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
     can_spectate = models.BooleanField(default=False, null=False)
     board_size = models.IntegerField(null=False, default=19)
@@ -48,7 +49,7 @@ class Game(models.Model):
 
 class Chatline(models.Model):
     game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
-    chat_code = models.CharField(max_length=6, default=generate_chat_code, unique=True)
+    chat_channel_code = models.CharField(max_length=6, default=generate_chat_channel_code, unique=True)
     # sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
     line = models.TextField(max_length=255, null=False)
     time = models.DateTimeField(auto_now_add = True)

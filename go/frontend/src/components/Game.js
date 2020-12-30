@@ -7,6 +7,7 @@ import {
   InputLabel,
   FormHelperText,
   Grid,
+  Button,
 } from "@material-ui/core";
 import ultilities from "../../static/css/ultilities.module.css";
 
@@ -182,51 +183,57 @@ export default class Game extends Component {
     this.gameCode = this.props.match.params.code;
     this.state = {
       boardSize: 19,
-      boardArray: this.props.boardArray,
-      gameChannelCode: this.props.gameChannelCode,
-      chatChannelCode: this.props.chatChannelCode,
+      boardArray: Array(19 * 19).fill('.'),
       isWhite: true,
       isTurn: true,
       whitePlayer: "game_id1",
       blackPlayer: "game_id2",
       chatLog: [],
     };
-    console.log(this.props.location);
-    // init game websocket
-    this.gameSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.gameChannelCode}`);
-    this.gameSocket.onmessage = (e) => {
-      let data = JSON.parse(e.data); 
+    fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
+      // connect chat channel
+      // init game websocket
+      console.log("Receive: ");
+      console.log(data);
+      let gameSocketURL = 'ws://'+ window.location.host + '/ws/' + data.code + '/';
+      console.log(gameSocketURL);
+      this.gameSocket = new WebSocket(gameSocketURL);
+      this.gameSocket.onmessage = (e) => {
+        let data = JSON.parse(e.data); 
+        this.setState({
+          boardArray: data.board_state.split(''),
+        })
+      };
+      this.gameSocket.onclose = (e) => {
+        console.error('Game socket closed unexpectedly');
+      };
+      // init chat websocket
+      // let chatSocketURL = `ws://${window.location.host}/ws/chat/${data.chat_channel_code}/`;
+      // console.log(chatSocketURL);
+      // this.chatSocket = new WebSocket(chatSocketURL);
+      // this.chatSocket.onmessage = (e) => {
+      //   let data = JSON.parse(e.data); 
+      //   this.setState({
+      //     chatLog: data.chat_log,
+      //   })
+      // };
+      // this.chatSocket.onclose = (e) => {
+      //   console.error('Chat socket closed unexpectedly');
+      // };
       this.setState({
-        boardArray: data.board_state,
-      })
-    };
-    this.gameSocket.onclose = (e) => {
-      console.error('Chat socket closed unexpectedly');
-    };
-    // init chat websocket
-    this.chatSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.chatChannelCode}`);
-    this.chatSocket.onmessage = (e) => {
-      let data = JSON.parse(e.data); 
-      this.setState({
-        chatLog: data.chat_log,
-      })
-    };
-    this.chatSocket.onclose = (e) => {
-      console.error('Chat socket closed unexpectedly');
-    };
+        gameChannelCode: data.code,
+        chatChannelCode: data.chat_channel_code,
+        boardArray: data.board_state.split(""),
+      });
+    });
+    console.log("State ");
+    console.log(this.state);
   }
 
   componentDidMount() {
     /* fetch id of player here */
     // update isTurn, whitePlayer, blackPlayer, size
-    // fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
-    //   console.log(data);
-    //   this.setState({
-    //     boardArray: data.board_state.split(''),
-    //   });
-    // });
-    // connect chat channel
-    console.log(this.props.location);
+    
   }
 
   onPlayerMove(idx) {
@@ -234,6 +241,8 @@ export default class Game extends Component {
     let boardArray = this.state.boardArray.slice();
     if (boardArray[idx] == EMPTY || boardArray[idx] == WHITE_GHOST || boardArray[idx] == BLACK_GHOST) {
       boardArray[idx] = isWhite === true ? WHITE : BLACK;
+      console.log("Board val at idx");
+      console.log(boardArray[idx]);
       // fetch api here to update board state
       // const requestOptions = {
       //   method: "POST",
@@ -253,7 +262,15 @@ export default class Game extends Component {
       // })
 
       // send boardArray to channel
-      this.gameSocket.send(JSON.stringify({board_state: this.state.boardArray}));
+      this.setState({
+        lastHover: null,
+        isWhite: isWhite == true ? false : true,
+        boardArray: boardArray,
+      });
+      this.gameSocket.send(JSON.stringify({'board_state': boardArray.join('')}));
+      console.log("Finish sending");
+      
+      
     }
   }
 

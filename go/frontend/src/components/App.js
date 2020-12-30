@@ -12,18 +12,15 @@ export default class App extends Component {
     };
   }
 
-  leaveGame(){
+  leaveGame() {
     this.setState({
       gameId: "",
     });
   }
 
-  joinGame(data){
+  joinGame(data) {
     this.setState({
       gameId: data.code,
-      gameChannelCode: data.game_channel_code,
-      chatChannelCode: data.chatChannelCode,
-      boardArray: data.board_state.split('')
     });
     // check if game is still up
   }
@@ -32,10 +29,24 @@ export default class App extends Component {
     return (
       <Router>
         <Switch>
-          <Route path="/game/:code" render={(props) => <Game {...props} boardArray={this.state.boardArray} gameChannelCode={this.state.gameChannelCode} chatChannelCode={this.state.chatChannelCode} leaveGameCallback={() => this.leaveGame()}/>}>
-          </Route>
-          <Route path="/" render={(props) => <Lobby {...props} joinGameCallback={() => this.joinGame()} />}>
-          </Route>
+          <Route
+            path="/game/:code"
+            render={(props) => (
+              <Game
+                {...props}
+                leaveGameCallback={() => this.leaveGame()}
+              />
+            )}
+          ></Route>
+          <Route
+            path="/"
+            render={(props) => (
+              <Lobby
+                {...props}
+                joinGameCallback={(data) => this.joinGame(data)}
+              />
+            )}
+          ></Route>
         </Switch>
       </Router>
     );

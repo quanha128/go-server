@@ -47,8 +47,10 @@ export default class JoinGame extends Component {
     };
     console.log(requestOptions);
     fetch("/api/join-game", requestOptions).then((res) => res.json()).then((data) => {
-      this.props.history.push(`/game/${data.code}`);
+      console.log("Join game");
+      console.log(data);
       this.props.joinGameCallback(data);
+      this.props.history.push(`/game/${data.code}`);
     })
   }
 
