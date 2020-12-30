@@ -40,6 +40,9 @@ class ChatLog extends Component {
 export default class Chat extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      message: "",
+    }
   }
 
   onTypeMessage(event){
@@ -49,13 +52,24 @@ export default class Chat extends Component {
     })
   }
 
+  onSendingMessage(){
+      this.setState({message: ""});
+      this.props.onSendingMessage(this.state.message);
+  }
+
+  onKeyDown(e){
+    console.log(e.keyCode);
+    if(e.keyCode == 13) // if ENTER key is pressed
+      this.onSendingMessage();
+  }
+
   render() {
     return (
       <div className={ultilities.topBottomContainer}>
         <ChatLog chatLog={this.props.chatLog} />
         <div className={ultilities.bottomElement}>
           <FormControl>
-            <TextField label="Message" onChange={(e) => this.onTypeMessage(e)}></TextField>
+            <TextField label="Message" value={this.state.message} onKeyDown={(e) => this.onKeyDown(e)} onChange={(e) => this.onTypeMessage(e)}></TextField>
             <FormHelperText id="my-helper-text">
               Type your message here.
             </FormHelperText>
@@ -63,11 +77,9 @@ export default class Chat extends Component {
           <Button
             color="secondary"
             variant="contained"
-            onClick={() => {
-              this.props.onSendingMessage(message);
-            }}
+            onClick={() => this.onSendingMessage()}
           >
-            Join game
+            Sned game
           </Button>
         </div>
       </div>
