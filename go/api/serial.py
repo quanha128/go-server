@@ -1,6 +1,5 @@
 from rest_framework import serializers
-from .models import Game,Player
-from 
+from .models import Game,Player,Account
 
 class GameSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,6 +24,7 @@ class PlayerSerializer(serializers.ModelSerializer):
         )
 
 class SignupSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
     class Meta:
         model = Account
@@ -37,11 +37,16 @@ class SignupSerializer(serializers.ModelSerializer):
         account = Account(
             username = self.validated_data['username']
         )
+        name = self.validated_data['name']
         password = self.validated_data['password']
         password2 = self.validated_data['password2']
     
         if password != password2:
             raise serializers.ValidationError({'password': 'Passwords must match'})
         account.set_password(password)
+
+        if name != "":
+            account.name = name
+
         account.save()
         return account

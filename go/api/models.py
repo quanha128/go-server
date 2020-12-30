@@ -28,7 +28,7 @@ class MyAccountManager(BaseUserManager):
             username = username,
         )
         user.set_password(password)
-        user.save(using=self_db)
+        user.save(using=self._db)
         return user
     
     def create_superuser(self, username, password):
@@ -39,7 +39,7 @@ class MyAccountManager(BaseUserManager):
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
-        user.save(using=self_db)
+        user.save(using=self._db)
         return user
 
 class Account(AbstractBaseUser):
