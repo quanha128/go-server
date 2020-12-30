@@ -182,24 +182,39 @@ export default class Game extends Component {
     this.gameCode = this.props.match.params.code;
     this.state = {
       boardSize: 19,
-      boardArray: Array(19 * 19).fill(EMPTY),
+      boardArray: this.props.boardArray,
+      gameChannelCode: this.props.gameChannelCode,
+      chatChannelCode: this.props.chatChannelCode,
       isWhite: true,
       isTurn: true,
       whitePlayer: "game_id1",
       blackPlayer: "game_id2",
       chatLog: [],
     };
+    this.gameSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.gameChannelCode}`);
+    // let gameSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.gameChannelCode}`);
+    this.gameSocket.onmessage = (e) => {
+      let data = JSON.parse(e.data); 
+      this.setState({
+        boardArray: data.board_state,
+      })
+    };
+    this.gameSocket.onclose = (e) => {
+      console.error('Chat socket closed unexpectedly');
+    };
   }
 
   componentDidMount() {
     /* fetch id of player here */
     // update isTurn, whitePlayer, blackPlayer, size
-    fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
-      console.log(data);
-      this.setState({
-        boardArray: data.board_state.split(''),
-      });
-    });
+    // fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
+    //   console.log(data);
+    //   this.setState({
+    //     boardArray: data.board_state.split(''),
+    //   });
+    // });
+    // connect chat channel
+    console.log(this.props.location);
   }
 
   onPlayerMove(idx) {
@@ -208,22 +223,25 @@ export default class Game extends Component {
     if (boardArray[idx] == EMPTY || boardArray[idx] == WHITE_GHOST || boardArray[idx] == BLACK_GHOST) {
       boardArray[idx] = isWhite === true ? WHITE : BLACK;
       // fetch api here to update board state
-      const requestOptions = {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          board_state: boardArray.join(''),
-          code: this.gameCode,
-        })
-      };
-      fetch("/api/update-game", requestOptions).then((res) => (res).json()).then((data) => {
-        console.log(data);
-        this.setState({
-          lastHover: null,
-          isWhite: isWhite == true ? false : true,
-          boardArray: data.board_state.split(''),
-        });
-      })
+      // const requestOptions = {
+      //   method: "POST",
+      //   headers: {'Content-Type':'application/json'},
+      //   body: JSON.stringify({
+      //     board_state: boardArray.join(''),
+      //     code: this.gameCode,
+      //   })
+      // };
+      // fetch("/api/update-game", requestOptions).then((res) => (res).json()).then((data) => {
+      //   console.log(data);
+      //   this.setState({
+      //     lastHover: null,
+      //     isWhite: isWhite == true ? false : true,
+      //     boardArray: data.board_state.split(''),
+      //   });
+      // })
+      
+      // send boardArray to channel
+      this.gameSocket.send(JSON.stringify({board_state: this.state.boardArray}));
     }
   }
 
