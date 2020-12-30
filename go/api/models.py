@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.core.validators import MinLengthValidator
 # from django.contrib.postgres.fields import ArrayField
 # from .helper import *
 import string, random
@@ -17,11 +19,52 @@ def generate_code():
 
 # Create your models here.
 
-class Account(models.Model):
-    username = models.CharField(max_length=32, unique = True)
+class MyAccountManager(BaseUserManager):
+    def create_user(self, username, password=None):
+        if not username:
+            raise ValueError("Username is required")
+
+        user = self.model(
+            username = username,
+        )
+        user.set_password(password)
+        user.save(using=self_db)
+        return user
+    
+    def create_superuser(self, username, password):
+        user = self.create_user(
+            username = username,
+            password = password
+        )
+        user.is_admin = True
+        user.is_staff = True
+        user.is_superuser = True
+        user.save(using=self_db)
+        return user
+
+class Account(AbstractBaseUser):
+    username = models.CharField(max_length=32, validators=[MinLengthValidator(4)], unique = True)
     name = models.CharField(max_length=32, default="Vladimir")
-    password = models.CharField(max_length=32)
-    password2 = models.CharField(max_length=32)
+    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
+    last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
+    is_admin = models.BooleanField(default = False)
+    is_active = models.BooleanField(default = True)
+    is_staff = models.BooleanField(default = False)
+    is_superuser = models.BooleanField(default = False)
+
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELD = ['username']
+
+    def __str__(self):
+        return self.username
+
+    def has_perm(self, perm, obj=None):
+        return self.is_admin
+    
+    def has_module_perms(self, app_label):
+        return True
+    
+    objects = MyAccountManager()
 
 
 class Player(models.Model):
