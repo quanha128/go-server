@@ -1,15 +1,22 @@
+from re import T
 from django.db import models
-# from django.contrib.postgres.fields import ArrayField
-# from .helper import *
 import string, random
 
 BOARD_SIZE = 19
 
-def generate_code():
+def generate_game_code():
     length = 6
     while True:
         code = ''.join(random.choices(string.ascii_letters, k=length))
         if Game.objects.filter(code = code).count() == 0:
+            break
+    return code
+
+def generate_chat_code():
+    length = 6
+    while True:
+        code = ''.join(random.choices(string.ascii_letters, k=length))
+        if Chatline.objects.filter(code = code).count() == 0:
             break
     return code
 
@@ -29,8 +36,9 @@ class Game(models.Model):
     #         models.CharField(null=False, default=".", max_length=1),
     #         size=19*19,
     #     )
+    name = models.CharField(default="New Game", max_length=50, null=False)
     board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
-    code = models.CharField(default=generate_code, unique=True, max_length=6)
+    code = models.CharField(default=generate_game_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
     can_spectate = models.BooleanField(default=False, null=False)
     board_size = models.IntegerField(null=False, default=19)
@@ -38,9 +46,9 @@ class Game(models.Model):
     time_start = models.DateTimeField(auto_now_add = True)
     # time_end = models.DateTimeField(auto_now_add = True)
 
-# class Chatline(models.Model):
-#     game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
-#     chat_id = models.CharField(max_length=255, default="")
-#     sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
-#     line = models.CharField(max_length=255, default="")
-#     time = models.DateTimeField(auto_now_add = True)
+class Chatline(models.Model):
+    game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
+    chat_code = models.CharField(max_length=6, default=generate_chat_code, unique=True)
+    # sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
+    line = models.TextField(max_length=255, null=False)
+    time = models.DateTimeField(auto_now_add = True)
