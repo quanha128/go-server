@@ -23,11 +23,6 @@ class ChatLog extends Component {
     super(props);
   }
 
-  componentDidMount() {
-    // get all the chat corresponding to the room
-    // get the chat id
-  }
-
   render() {
     const chatLogComp = this.props.chatLog.map((chatObj) => (
       <ChatLine sender={chatObj.sender} message={chatObj.message}></ChatLine>
@@ -46,17 +41,33 @@ export default class Chat extends Component {
     super(props);
   }
 
+  onTypeMessage(event){
+    console.log(event.target.value);
+    this.setState({
+      'message': event.target.value,
+    })
+  }
+
   render() {
     return (
       <div className={ultilities.topBottomContainer}>
         <ChatLog chatLog={this.props.chatLog} />
         <div className={ultilities.bottomElement}>
           <FormControl>
-            <TextField label="Message"></TextField>
+            <TextField label="Message" onChange={(e) => this.onTypeMessage(e)}></TextField>
             <FormHelperText id="my-helper-text">
               Type your message here.
             </FormHelperText>
           </FormControl>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => {
+              this.props.onSendingMessage(message);
+            }}
+          >
+            Join game
+          </Button>
         </div>
       </div>
     );

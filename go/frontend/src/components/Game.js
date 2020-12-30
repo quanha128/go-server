@@ -191,8 +191,9 @@ export default class Game extends Component {
       blackPlayer: "game_id2",
       chatLog: [],
     };
+    console.log(this.props.location);
+    // init game websocket
     this.gameSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.gameChannelCode}`);
-    // let gameSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.gameChannelCode}`);
     this.gameSocket.onmessage = (e) => {
       let data = JSON.parse(e.data); 
       this.setState({
@@ -200,6 +201,17 @@ export default class Game extends Component {
       })
     };
     this.gameSocket.onclose = (e) => {
+      console.error('Chat socket closed unexpectedly');
+    };
+    // init chat websocket
+    this.chatSocket = new WebSocket(`ws://${this.props.location}/ws/${this.props.chatChannelCode}`);
+    this.chatSocket.onmessage = (e) => {
+      let data = JSON.parse(e.data); 
+      this.setState({
+        chatLog: data.chat_log,
+      })
+    };
+    this.chatSocket.onclose = (e) => {
       console.error('Chat socket closed unexpectedly');
     };
   }
@@ -239,7 +251,7 @@ export default class Game extends Component {
       //     boardArray: data.board_state.split(''),
       //   });
       // })
-      
+
       // send boardArray to channel
       this.gameSocket.send(JSON.stringify({board_state: this.state.boardArray}));
     }
@@ -264,6 +276,10 @@ export default class Game extends Component {
       isWhite: isWhite,
       boardArray: boardArray,
     });
+  }
+
+  onSendingMessage(message){
+    this.chatSocket.send(JSON.stringify({'message': message}));
   }
 
   leaveGameButtonPressed() {
@@ -292,7 +308,7 @@ export default class Game extends Component {
             />
           </Grid>
           <Grid item xs={4}>
-            <Chat chatLog={this.state.chatLog} />
+            <Chat chatLog={this.state.chatLog} onSendingMessage={() => this.onSendingMessage()} />
           </Grid>
         </Grid>
       </div>
