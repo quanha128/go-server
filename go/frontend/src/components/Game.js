@@ -233,6 +233,7 @@ export default class Game extends Component {
           gameChannelCode: data.code,
           chatChannelCode: data.chat_channel_code,
           boardArray: data.board_state.split(""),
+          chatLog: data.chat_log,
         });
       });
   }

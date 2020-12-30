@@ -28,6 +28,8 @@ class GetGame(APIView):
             if len(game) > 0:
                 data = GameSerializer(game[0]).data
                 data['is_host'] = self.request.session.session_key == game[0].host
+                data['chat_log'] = [{'sender': 'thanh', 'message': query.line} for query in Chatline.objects.filter(chat_channel_code=game[0].chat_channel_code)]
+                print(data['chat_log'])
                 return Response(data, status=status.HTTP_200_OK)
             return Response({'Room Not Found': 'Invalid Room Code.'}, status=status.HTTP_404_NOT_FOUND)
         
