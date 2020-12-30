@@ -1,8 +1,31 @@
 from django.db import models
-from django.contrib.postgres.fields import ArrayField
+# from django.contrib.postgres.fields import ArrayField
+# from .helper import *
+import string, random
+
+BOARD_SIZE = 19
+
+def generate_code():
+    length = 6
+    while True:
+        code = ''.join(random.choices(string.ascii_letters, k=length))
+        if Game.objects.filter(code = code).count() == 0:
+            break
+    return code
+
+
 
 # Create your models here.
+
+class Account(models.Model):
+    username = models.CharField(max_length=32, unique = True)
+    name = models.CharField(max_length=32, default="Vladimir")
+    password = models.CharField(max_length=32)
+    password2 = models.CharField(max_length=32)
+
+
 class Player(models.Model):
+    # user_id = models.ForeignKey(Account, on_delete = models.CASCADE)
     game_id = models.ForeignKey('Game', on_delete = models.SET_NULL, blank = True, null = True)
     is_playing = models.BooleanField(null= False, default = False)
     is_spectating = models.BooleanField(null= False, default = False)
@@ -11,18 +34,16 @@ class Player(models.Model):
     elo = models.IntegerField(null=False, default = 1000)
 
 class Game(models.Model):
-    player1_id = models.ForeignKey(Player, related_name="P1", on_delete = models.SET_NULL, blank = True, null = True)
-    player2_id = models.ForeignKey(Player, related_name="P2", on_delete = models.SET_NULL, blank = True, null = True)
-    board_state = ArrayField(
-        ArrayField(
-            models.IntegerField(null=False, default=0),
-            size=19,
-        ),
-        size=19,
-    )
+    # player1_id = models.ForeignKey(Player, related_name="P1", on_delete = models.SET_NULL, blank = True, null = True)
+    # player2_id = models.ForeignKey(Player, related_name="P2", on_delete = models.SET_NULL, blank = True, null = True)
+    board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
+    code = models.CharField(default=generate_code, unique=True, max_length=6)
+    host = models.CharField(max_length=10, unique=True)
+    can_spectate = models.BooleanField(default=False, null=False)
+    board_size = models.IntegerField(null=False, default=19)
     #player_turn = models.IntergerField(null=False, defalut = 0)
     time_start = models.DateTimeField(auto_now_add = True)
-    time_end = models.DateTimeField(auto_now_add = True)
+    # time_end = models.DateTimeField(auto_now_add = True)
 
 class Chatline(models.Model):
     game_id = models.ForeignKey(Game, on_delete = models.CASCADE)

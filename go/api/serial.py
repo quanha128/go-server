@@ -1,0 +1,46 @@
+from rest_framework import serializers
+from .models import Game,Player,Account
+
+class GameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = (
+            'id', 'board_size', 'code', 'host', 'can_spectate', 'time_start',
+        )
+
+class CreateGameSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = (
+            'board_size', 'can_spectate',
+        )
+
+class PlayerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Game
+        fields = (
+            'id', 'game_id', 'is_playing', 'is_spectating', 'chat_id', 'avatar_url',
+            'elo',
+        )
+
+class SignupSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    class Meta:
+        model = Account
+        fields = ['username', 'name', 'password', 'password2']
+        extra_kwargs={
+            'password': {'write_only': True}
+        }
+    
+    def save(self):
+        account = Account(
+            username = self.validated_data['username']
+        )
+        password = self.validated_data['password']
+        password2 = self.validated_data['password2']
+    
+        if password != password2:
+            raise serializers.ValidationError({'password': 'Passwords must match'})
+        account.set_password(password)
+        account.save()
+        return account
