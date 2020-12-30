@@ -47,8 +47,10 @@ export default class CreateGame extends Component {
       }),
     };
     fetch("/api/create-game", requestOptions).then((res) => res.json()).then((data) => {
+      console.log("Create game");
+      console.log(data);
+      this.props.joinGameCallback(data);
       this.props.history.push(`/game/${data.code}`);
-      this.props.joinGameCallback(data.code);
     });
     
   }

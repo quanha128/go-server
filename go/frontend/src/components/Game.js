@@ -7,6 +7,7 @@ import {
   InputLabel,
   FormHelperText,
   Grid,
+  Button,
 } from "@material-ui/core";
 import ultilities from "../../static/css/ultilities.module.css";
 
@@ -42,7 +43,10 @@ const WHITE_GHOST = "wg"; // for hover effect
 const BLACK_GHOST = "bg"; // for hover effect
 
 function Square(props) {
-  const ghostClass = ((props.value == BLACK_GHOST || props.value == WHITE_GHOST) ? ultilities["ghost"] : "");
+  const ghostClass =
+    props.value == BLACK_GHOST || props.value == WHITE_GHOST
+      ? ultilities["ghost"]
+      : "";
   const goPiece = (
     <svg height="23" width="23" className={ghostClass}>
       <defs>
@@ -73,11 +77,13 @@ function Square(props) {
         cx="50%"
         cy="50%"
         r="45%"
-        fill={`url(${props.value.includes(BLACK) ? "#blackPiece" : "#whitePiece"})`}
+        fill={`url(${
+          props.value.includes(BLACK) ? "#blackPiece" : "#whitePiece"
+        })`}
       />
     </svg>
   );
-  let goSquare = (props.value == EMPTY ? null : goPiece);
+  let goSquare = props.value == EMPTY ? null : goPiece;
   return (
     <div
       onMouseEnter={() => props.onMouseEnter()}
@@ -182,48 +188,79 @@ export default class Game extends Component {
     this.gameCode = this.props.match.params.code;
     this.state = {
       boardSize: 19,
-      boardArray: Array(19 * 19).fill(EMPTY),
+      boardArray: Array(19 * 19).fill("."),
       isWhite: true,
       isTurn: true,
       whitePlayer: "game_id1",
       blackPlayer: "game_id2",
       chatLog: [],
     };
+    fetch(`/api/get-game?code=${this.gameCode}`)
+      .then((res) => res.json())
+      .then((data) => {
+        // connect chat channel
+        // init game websocket
+        console.log("Receive: ");
+        console.log(data);
+        let gameSocketURL =
+          "ws://" + window.location.host + "/ws/" + data.code + "/";
+        console.log(gameSocketURL);
+        this.gameSocket = new WebSocket(gameSocketURL);
+        this.gameSocket.onmessage = (e) => {
+          let data = JSON.parse(e.data);
+          this.setState({
+            boardArray: data.board_state.split(""),
+          });
+        };
+        this.gameSocket.onclose = (e) => {
+          console.error("Game socket closed unexpectedly");
+        };
+        // init chat websocket
+        let chatSocketURL = `ws://${window.location.host}/ws/chat/${data.chat_channel_code}/`;
+        console.log(chatSocketURL);
+        this.chatSocket = new WebSocket(chatSocketURL);
+        this.chatSocket.onmessage = (e) => {
+          let data = JSON.parse(e.data);
+          let chatLog = this.state.chatLog;
+          this.setState({
+            chatLog: chatLog.concat({ sender: "thanh", message: data.message }),
+          });
+        };
+        this.chatSocket.onclose = (e) => {
+          console.error("Chat socket closed unexpectedly");
+        };
+        this.setState({
+          gameChannelCode: data.code,
+          chatChannelCode: data.chat_channel_code,
+          boardArray: data.board_state.split(""),
+        });
+      });
   }
 
   componentDidMount() {
     /* fetch id of player here */
     // update isTurn, whitePlayer, blackPlayer, size
-    fetch(`/api/get-game?code=${this.gameCode}`).then((res) => res.json()).then((data) => {
-      console.log(data);
-      this.setState({
-        boardArray: data.board_state.split(''),
-      });
-    });
   }
 
   onPlayerMove(idx) {
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
-    if (boardArray[idx] == EMPTY || boardArray[idx] == WHITE_GHOST || boardArray[idx] == BLACK_GHOST) {
+    if (
+      boardArray[idx] == EMPTY ||
+      boardArray[idx] == WHITE_GHOST ||
+      boardArray[idx] == BLACK_GHOST
+    ) {
       boardArray[idx] = isWhite === true ? WHITE : BLACK;
-      // fetch api here to update board state
-      const requestOptions = {
-        method: "POST",
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({
-          board_state: boardArray.join(''),
-          code: this.gameCode,
-        })
-      };
-      fetch("/api/update-game", requestOptions).then((res) => (res).json()).then((data) => {
-        console.log(data);
-        this.setState({
-          lastHover: null,
-          isWhite: isWhite == true ? false : true,
-          boardArray: data.board_state.split(''),
-        });
-      })
+
+      // send boardArray to channel
+      this.setState({
+        lastHover: null,
+        isWhite: isWhite == true ? false : true,
+        boardArray: boardArray,
+      });
+      this.gameSocket.send(
+        JSON.stringify({ board_state: boardArray.join("") })
+      );
     }
   }
 
@@ -231,12 +268,9 @@ export default class Game extends Component {
     console.log("Hover at " + idx);
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
-    if(this.state.lastHover != null)
-      boardArray[this.state.lastHover] = EMPTY;
-    if(boardArray[idx] == WHITE || boardArray[idx] == BLACK)
-      return;
+    if (this.state.lastHover != null) boardArray[this.state.lastHover] = EMPTY;
+    if (boardArray[idx] == WHITE || boardArray[idx] == BLACK) return;
     if (boardArray[idx] == EMPTY) {
-      
       boardArray[idx] = isWhite === true ? WHITE_GHOST : BLACK_GHOST;
       console.log(boardArray[idx]);
       // fetch api here to update board state
@@ -246,6 +280,10 @@ export default class Game extends Component {
       isWhite: isWhite,
       boardArray: boardArray,
     });
+  }
+
+  onSendingMessage(message) {
+    this.chatSocket.send(JSON.stringify({ 'message': message }));
   }
 
   leaveGameButtonPressed() {
@@ -274,7 +312,10 @@ export default class Game extends Component {
             />
           </Grid>
           <Grid item xs={4}>
-            <Chat chatLog={this.state.chatLog} />
+            <Chat
+              chatLog={this.state.chatLog}
+              onSendingMessage={(message) => this.onSendingMessage(message)}
+            />
           </Grid>
         </Grid>
       </div>

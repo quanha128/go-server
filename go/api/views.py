@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Game
+from .models import *
 from .serial import GameSerializer, CreateGameSerializer, UpdateGameSerializer
 
 # Create your views here.
@@ -16,6 +16,7 @@ class GameView(generics.ListAPIView):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
 
+# get game using game_code
 class GetGame(APIView):
     serializer_class = GameSerializer
     lookup_url_kwarg = 'code'
@@ -32,6 +33,8 @@ class GetGame(APIView):
         
         return Response({'Bad Request': 'Code parameter not found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
+# udpate game after a move
+# move to consumer
 class UpdateGame(APIView):
     lookup_url_kwarg = 'code'
 
@@ -80,7 +83,6 @@ class CreateGameView(APIView):
             board_state = "."*(board_size*board_size)
             can_spectate = serializer.data.get('can_spectate')
             board_state = "." * (board_size**2)
-            
             host = self.request.session.session_key
             queryset = Game.objects.filter(host=host)
             if queryset.exists():

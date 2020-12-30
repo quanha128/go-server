@@ -5,6 +5,7 @@ import {
   InputLabel,
   FormHelperText,
   Grid,
+  Button,
 } from "@material-ui/core";
 import React, { Component } from "react";
 import { extend } from "lodash";
@@ -23,11 +24,6 @@ class ChatLog extends Component {
     super(props);
   }
 
-  componentDidMount() {
-    // get all the chat corresponding to the room
-    // get the chat id
-  }
-
   render() {
     const chatLogComp = this.props.chatLog.map((chatObj) => (
       <ChatLine sender={chatObj.sender} message={chatObj.message}></ChatLine>
@@ -44,6 +40,27 @@ class ChatLog extends Component {
 export default class Chat extends Component {
   constructor(props) {
     super(props);
+    this.state = {
+      message: "",
+    }
+  }
+
+  onTypeMessage(event){
+    console.log(event.target.value);
+    this.setState({
+      'message': event.target.value,
+    })
+  }
+
+  onSendingMessage(){
+      this.setState({message: ""});
+      this.props.onSendingMessage(this.state.message);
+  }
+
+  onKeyDown(e){
+    console.log(e.keyCode);
+    if(e.keyCode == 13) // if ENTER key is pressed
+      this.onSendingMessage();
   }
 
   render() {
@@ -52,11 +69,18 @@ export default class Chat extends Component {
         <ChatLog chatLog={this.props.chatLog} />
         <div className={ultilities.bottomElement}>
           <FormControl>
-            <TextField label="Message"></TextField>
+            <TextField label="Message" value={this.state.message} onKeyDown={(e) => this.onKeyDown(e)} onChange={(e) => this.onTypeMessage(e)}></TextField>
             <FormHelperText id="my-helper-text">
               Type your message here.
             </FormHelperText>
           </FormControl>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => this.onSendingMessage()}
+          >
+            Sned game
+          </Button>
         </div>
       </div>
     );
