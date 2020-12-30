@@ -52,3 +52,45 @@ class GoConsumer(JsonWebsocketConsumer):
 
         # Send message to WebSocket
         self.send(text_data=json.dumps({'board_state': event["board_state"]}))
+
+class ChatConsumer(JsonWebsocketConsumer):
+     def connect(self):
+        self.chat_channel_code = self.scope['url_route']['kwargs']['chat_channel_code']
+        self.chat_group_name = 'chat_%s' % self.chat_channel_code
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.chat_group_name,
+            self.channel_name
+        )
+
+        self.accept()
+    
+     def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.chat_group_name,
+            self.channel_name
+        )
+
+    # Receive play move from player
+     def receive(self, text_data):
+        # Get message JSON
+        text_data_json = json.loads(text_data)
+        # Create new chatline entry
+        message = text_data_json["message"]
+        chat_line = Chatline(line=message, chat_channel_code=self.chat_channel_code)
+        chat_line.save()
+        # Send the updated board state to both players
+        async_to_sync(self.channel_layer.group_send)(
+            self.chat_group_name,
+            {
+                'type': 'chat_message',
+                'message': message,
+            }
+        )
+
+    # Receive play move from game group
+     def chat_message(self, event):
+        move = event['message']
+
+        # Send message to WebSocket
+        self.send(text_data=json.dumps({'message': event["message"]}))
