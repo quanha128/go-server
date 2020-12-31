@@ -50,3 +50,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
         account.save()
         return account
+
+class LoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['username', 'password']
