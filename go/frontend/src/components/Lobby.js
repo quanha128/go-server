@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Link, Switch, Route } from "react-router-dom";
 import CreateGame from "./CreateGame";
 import JoinGame from "./JoinGame";
 import SpectateGame from "./SpectateGame";
+import BoardGraphic from "./BoardGraphic";
 import { Grid } from "@material-ui/core";
 
 class GameInLobby extends Component {
@@ -61,7 +62,7 @@ export default class Lobby extends Component {
             <Route path="/spectate-game"><SpectateGame/></Route>
           </Switch>
         </Router>
-      </div>
+        </div>
     );
   }
 }

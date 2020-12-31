@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Chat from "./Chat";
+import { GoPieceDef } from "./BoardGraphic";
 import {
   FormControl,
   TextField,
@@ -47,32 +48,9 @@ function Square(props) {
     props.value == BLACK_GHOST || props.value == WHITE_GHOST
       ? ultilities["ghost"]
       : "";
-  const goPiece = (
+  const goPiece = (<React.Fragment>
+    <GoPieceDef />
     <svg height="23" width="23" className={ghostClass}>
-      <defs>
-        <radialGradient
-          id="blackPiece"
-          cx="10%"
-          cy="10%"
-          r="70%"
-          fx="20%"
-          fy="20%"
-        >
-          <stop offset="0%" style={{ "stop-color": "#C0C0C0" }} />
-          <stop offset="100%" style={{ "stop-color": "black" }} />
-        </radialGradient>
-        <radialGradient
-          id="whitePiece"
-          cx="70%"
-          cy="70%"
-          r="95%"
-          fx="20%"
-          fy="20%"
-        >
-          <stop offset="0%" style={{ "stop-color": "#FFFFFF" }} />
-          <stop offset="100%" style={{ "stop-color": "#A9A9A9" }} />
-        </radialGradient>
-      </defs>
       <circle
         cx="50%"
         cy="50%"
@@ -82,6 +60,7 @@ function Square(props) {
         })`}
       />
     </svg>
+    </React.Fragment>
   );
   let goSquare = props.value == EMPTY ? null : goPiece;
   return (
@@ -95,42 +74,6 @@ function Square(props) {
       {goSquare}
     </div>
   );
-  // if (props.value == EMPTY) {
-  //   return (
-  //     <div
-  //       onMouseEnter={() => props.onMouseEnter()}
-  //       // onMouseLeave={() => props.onMouseLeave()}
-  //       onClick={() => props.onClick()}
-  //       className={ultilities["imgOverlayWrap"]}
-  //     >
-  //       <img src={props.srcImg} />
-  //     </div>
-  //   );
-  // } else if (props.value == BLACK_GHOST || props.value == WHITE_GHOST) {
-  //   return (
-  //     <div
-  //       onMouseEnter={() => props.onMouseEnter()}
-  //       // onMouseLeave={() => props.onMouseLeave()}
-  //       onClick={() => props.onClick()}
-  //       className={ultilities["imgOverlayWrap"] + " " + ultilities["ghost"]}
-  //     >
-  //       <img src={props.srcImg} className={ultilities["unghost"]}/>
-  //       {goSquare}
-  //     </div>
-  //   );
-  // } else {
-  //   return (
-  //     <div
-  //       onMouseEnter={() => props.onMouseEnter()}
-  //       // onMouseLeave={() => props.onMouseLeave()}
-  //       onClick={() => props.onClick()}
-  //       className={ultilities["imgOverlayWrap"]}
-  //     >
-  //       <img src={props.srcImg} />
-  //       {goSquare}
-  //     </div>
-  //   );
-  // }
 }
 
 class Board extends Component {
@@ -152,6 +95,22 @@ class Board extends Component {
         positionFlag |= ii != size - 1 ? positionConst.BOTTOM : 0;
         positionFlag |= jj != 0 ? positionConst.RIGHT : 0;
         positionFlag |= jj != size - 1 ? positionConst.LEFT : 0;
+        if(size == 19){
+          const iidx = [3, 9, 15];
+          const jjdx = [3, 9, 15];
+          if(iidx.includes(ii) && jjdx.includes(jj))
+            positionFlag = positionConst.DOT;
+        } else if(size == 13){
+          const iidx = [3, 9];
+          const jjdx = [3, 9];
+          if((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 6 && ii == 6))
+          positionFlag = positionConst.DOT;
+        } else if(size == 9){
+          const iidx = [2, 6];
+          const jjdx = [2, 6];
+          if((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 4 && ii == 4))
+          positionFlag = positionConst.DOT;
+        }
         return (
           <Square
             key={i * size + idx}
