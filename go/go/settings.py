@@ -35,13 +35,25 @@ INSTALLED_APPS = [
     'api',
     'frontend',
     'channels',
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
+    'rest_framework.authtoken',
+    'api',
+    'frontend',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_auth'
 ]
+
+SITE_ID = 1
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -54,6 +66,8 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'go.urls'
+
+AUTH_USER_MODEL = 'api.Account'
 
 TEMPLATES = [
     {
@@ -132,5 +146,15 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+<<<<<<< HEAD
 # REDIS_HOST = 'localhost'
 # REDIS_PORT = 6379
+=======
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+>>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
