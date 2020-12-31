@@ -200,8 +200,6 @@ export default class Game extends Component {
       .then((data) => {
         // connect chat channel
         // init game websocket
-        console.log("Receive: ");
-        console.log(data);
         let gameSocketURL =
           "ws://" + window.location.host + "/ws/" + data.code + "/";
         console.log(gameSocketURL);
@@ -259,9 +257,7 @@ export default class Game extends Component {
         isWhite: isWhite == true ? false : true,
         boardArray: boardArray,
       });
-      this.gameSocket.send(
-        JSON.stringify({ board_state: boardArray.join("") })
-      );
+      this.gameSocket.send(JSON.stringify({ 'ko': idx, 'color': boardArray[idx] }));
     }
   }
 
@@ -284,7 +280,7 @@ export default class Game extends Component {
   }
 
   onSendingMessage(message) {
-    this.chatSocket.send(JSON.stringify({ 'message': message }));
+    this.chatSocket.send(JSON.stringify({ message: message }));
   }
 
   leaveGameButtonPressed() {

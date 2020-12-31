@@ -3,15 +3,14 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
 from rest_framework.status import HTTP_202_ACCEPTED
 from .models import *
+from .go_board_helper.go import Position, BLACK, WHITE
 
 class GoConsumer(JsonWebsocketConsumer):
-    # def __init__(self, code):
-    #     self.games = Game.objects.filter(code=code)
-
     # naive implementation
      def connect(self):
         self.code = self.scope['url_route']['kwargs']['code']
         self.game = Game.objects.filter(code=self.code)[0]
+        self.position = Position(board=self.game.board_state, ko=self.game.ko)
         self.game_group_name = 'game_%s' % self.game.code
 
         async_to_sync(self.channel_layer.group_add)(
@@ -31,10 +30,9 @@ class GoConsumer(JsonWebsocketConsumer):
      def receive(self, text_data):
         # Decode board state from JSON
         text_data_json = json.loads(text_data)
-
-        print("text_data_json");
         # Change board state on db
-        self.game.board_state = text_data_json["board_state"]
+        self.position = self.position.play_move(fc=text_data_json["ko"], color=text_data_json["color"])
+        self.game.board_state = self.position.get_board()
         new_state = self.game.board_state
         self.game.save(update_fields=['board_state'])
         # Send the updated board state to both players

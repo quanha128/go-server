@@ -38,6 +38,7 @@ class Game(models.Model):
     #     )
     name = models.CharField(default="New Game", max_length=50, null=False)
     board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
+    ko = models.IntegerField(default=-1)
     code = models.CharField(default=generate_game_code, unique=True, max_length=6)
     chat_channel_code = models.CharField(default=generate_chat_channel_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
