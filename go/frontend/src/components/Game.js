@@ -194,6 +194,7 @@ export default class Game extends Component {
       whitePlayer: "game_id1",
       blackPlayer: "game_id2",
       chatLog: [],
+      legalMove: true,
     };
     fetch(`/api/get-game?code=${this.gameCode}`)
       .then((res) => res.json())
@@ -206,13 +207,24 @@ export default class Game extends Component {
         this.gameSocket = new WebSocket(gameSocketURL);
         this.gameSocket.onmessage = (e) => {
           let data = JSON.parse(e.data);
-          this.setState({
-            boardArray: data.board_state.split(""),
-          });
+          if(data.message){
+            alert(data.message);
+          } else{
+            let isWhite = this.state.isWhite;
+            console.log("Received board state: ");
+            console.log(data.board_state);
+            this.setState({
+              lastHover: null,
+              isWhite: isWhite == true ? false : true,
+              boardArray: data.board_state != null ? data.board_state.split("") : this.state.boardArray,
+            });
+            console.log(this.state.boardArray);
+          }
         };
         this.gameSocket.onclose = (e) => {
           console.error("Game socket closed unexpectedly");
         };
+        /****/
         // init chat websocket
         let chatSocketURL = `ws://${window.location.host}/ws/chat/${data.chat_channel_code}/`;
         console.log(chatSocketURL);
@@ -227,6 +239,7 @@ export default class Game extends Component {
         this.chatSocket.onclose = (e) => {
           console.error("Chat socket closed unexpectedly");
         };
+        // set value
         this.setState({
           gameChannelCode: data.code,
           chatChannelCode: data.chat_channel_code,
@@ -234,11 +247,6 @@ export default class Game extends Component {
           chatLog: data.chat_log,
         });
       });
-  }
-
-  componentDidMount() {
-    /* fetch id of player here */
-    // update isTurn, whitePlayer, blackPlayer, size
   }
 
   onPlayerMove(idx) {
@@ -249,20 +257,13 @@ export default class Game extends Component {
       boardArray[idx] == WHITE_GHOST ||
       boardArray[idx] == BLACK_GHOST
     ) {
-      boardArray[idx] = isWhite === true ? WHITE : BLACK;
-
+      let move = isWhite === true ? WHITE : BLACK;
       // send boardArray to channel
-      this.setState({
-        lastHover: null,
-        isWhite: isWhite == true ? false : true,
-        boardArray: boardArray,
-      });
-      this.gameSocket.send(JSON.stringify({ 'ko': idx, 'color': boardArray[idx] }));
+      this.gameSocket.send(JSON.stringify({ 'ko': idx, 'color': move }));
     }
   }
 
   onPlayerHover(idx) {
-    console.log("Hover at " + idx);
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
     if (this.state.lastHover != null) boardArray[this.state.lastHover] = EMPTY;

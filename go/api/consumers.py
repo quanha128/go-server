@@ -3,7 +3,7 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, JsonWebsocketConsumer
 from rest_framework.status import HTTP_202_ACCEPTED
 from .models import *
-from .go_board_helper.go import Position, BLACK, WHITE
+from .go_board_helper.go import Position, BLACK, WHITE, IllegalMove
 
 class GoConsumer(JsonWebsocketConsumer):
     # naive implementation
@@ -31,18 +31,23 @@ class GoConsumer(JsonWebsocketConsumer):
         # Decode board state from JSON
         text_data_json = json.loads(text_data)
         # Change board state on db
-        self.position = self.position.play_move(fc=text_data_json["ko"], color=text_data_json["color"])
-        self.game.board_state = self.position.get_board()
-        new_state = self.game.board_state
-        self.game.save(update_fields=['board_state'])
-        # Send the updated board state to both players
-        async_to_sync(self.channel_layer.group_send)(
-            self.game_group_name,
-            {
-                'type': 'play_move',
-                'board_state': new_state
-            }
-        )
+        try:
+            position = self.position.play_move(fc=text_data_json["ko"], color=text_data_json["color"])
+        except IllegalMove as error:
+            self.send(text_data=json.dumps({'message': str(error)}))
+        else:
+            self.position = position
+            self.game.board_state = self.position.get_board()
+            new_state = self.game.board_state
+            self.game.save(update_fields=['board_state'])
+            # Send the updated board state to both players
+            async_to_sync(self.channel_layer.group_send)(
+                self.game_group_name,
+                {
+                    'type': 'play_move',
+                    'board_state': new_state
+                }
+            )
 
     # Receive play move from game group
      def play_move(self, event):
@@ -77,6 +82,7 @@ class ChatConsumer(JsonWebsocketConsumer):
         message = text_data_json["message"]
         chat_line = Chatline(line=message, chat_channel_code=self.chat_channel_code)
         chat_line.save()
+    
         # Send the updated board state to both players
         async_to_sync(self.channel_layer.group_send)(
             self.chat_group_name,
@@ -89,6 +95,5 @@ class ChatConsumer(JsonWebsocketConsumer):
     # Receive play move from game group
      def chat_message(self, event):
         move = event['message']
-
         # Send message to WebSocket
         self.send(text_data=json.dumps({'message': event["message"]}))
