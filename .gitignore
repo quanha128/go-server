@@ -5,3 +5,4 @@ venv
 *.pyc
 go/__pycache__
 *.py[cod]
+migrations
