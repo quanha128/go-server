@@ -87,7 +87,6 @@ class CreateGameView(APIView):
             board_size = serializer.data.get('board_size')
             board_state = "."*(board_size*board_size)
             can_spectate = serializer.data.get('can_spectate')
-            board_state = "." * (board_size**2)
             host = self.request.session.session_key
             queryset = Game.objects.filter(host=host)
             if queryset.exists():
@@ -137,6 +136,13 @@ class SignupView(generics.CreateAPIView):
         else:
             data = serializer.errors
         return Response(data)
+
+class IsLoggedIn(APIView):
+    def post(self, request, format=None):
+        if request.user.is_authenticated:
+            return Response({'is_logged_in': True}, status=status.HTTP_200_OK)
+        else:
+            return Response({'is_logged_in': False}, status=status.HTTP_200_OK);
 
 class UserList(generics.ListAPIView):
     queryset = Account.objects.all()

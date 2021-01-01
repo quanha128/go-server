@@ -119,6 +119,6 @@ class Game(models.Model):
 class Chatline(models.Model):
     game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
     chat_id = models.CharField(max_length=255, default="")
-    sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
+    # sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
     line = models.CharField(max_length=255, default="")
     time = models.DateTimeField(auto_now_add = True)

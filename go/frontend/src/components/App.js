@@ -7,6 +7,7 @@ import {
   Route,
   Redirect,
 } from "react-router-dom";
+import { getCookie } from "../helper";
 import Game from "./Game";
 import Lobby from "./Lobby";
 import Login from "./Login";
@@ -16,7 +17,24 @@ export default class App extends Component {
     super(props);
     this.state = {
       gameId: "",
+      isLoggedIn: null,
     };
+  }
+
+  componentDidMount() {
+    const csrftoken = getCookie("csrftoken");
+    let isLoggedIn;
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+    };
+    fetch("/api/is-logged-in", requestOptions)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        this.setState({ isLoggedIn: data.is_logged_in });
+        this.forceUpdate();
+      });
   }
 
   login(token) {
@@ -51,20 +69,7 @@ export default class App extends Component {
       <Router>
         <Switch>
           <Route
-            path="/login"
-            render={(props) => {
-              return (
-                <Login {...props} onLogin={(token) => this.login(token)} />
-              );
-            }}
-          ></Route>
-          <Route
-            path="/game/:code"
-            render={(props) => (
-              <Game {...props} leaveGameCallback={() => this.leaveGame()} />
-            )}
-          ></Route>
-          <Route
+            exact
             path="/"
             render={(props) => {
               return this.state.isLoggedIn == true ? (
@@ -77,6 +82,22 @@ export default class App extends Component {
                 <Redirect to="/login"></Redirect>
               );
             }}
+          ></Route>
+          <Route
+            path="/login"
+            render={(props) => {                  
+              return this.state.isLoggedIn == true ? (
+                <Redirect to="/"></Redirect>
+              ) : (
+                <Login {...props} onLogin={(token) => this.login(token)} />
+              );
+            }}
+          ></Route>
+          <Route
+            path="/game/:code"
+            render={(props) => (
+              <Game {...props} leaveGameCallback={() => this.leaveGame()} />
+            )}
           ></Route>
         </Switch>
       </Router>

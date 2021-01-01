@@ -11,6 +11,7 @@ import {
   FormGroup,
   Button,
 } from "@material-ui/core";
+import { getCsrf } from "../helper";
 
 export default class CreateGame extends Component {
   constructor(props) {
@@ -34,10 +35,10 @@ export default class CreateGame extends Component {
     });
   }
 
-  createGameButtonPressed(){
+  createGameButtonPressed() {
     const requestOptions = {
       method: "POST",
-      headers: {'Content-Type': 'application/json'},
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
       body: JSON.stringify({
         game_name: this.state.gameName,
         have_password: this.state.have_password,
@@ -46,13 +47,19 @@ export default class CreateGame extends Component {
         can_spectate: true,
       }),
     };
-    fetch("/api/create-game", requestOptions).then((res) => res.json()).then((data) => {
-      console.log("Create game");
-      console.log(data);
-      this.props.joinGameCallback(data);
-      this.props.history.push(`/game/${data.code}`);
-    });
-    
+    fetch("/api/create-game", requestOptions)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.error) throw data;
+        console.log("Create game");
+        console.log(data);
+        this.props.joinGameCallback(data);
+        this.props.history.push(`/game/${data.code}`);
+      })
+      .catch((e) => {
+        console.log("error");
+        console.log(e);
+      });
   }
 
   render() {
@@ -82,14 +89,18 @@ export default class CreateGame extends Component {
             <FormLabel label="Password" />
             <Input
               placeholder="Password"
-              disabled={!(this.state.havePassword)}
-              name="password" 
+              disabled={!this.state.havePassword}
+              name="password"
               onChange={(e) => this.changeInputField(e)}
             ></Input>
           </FormControl>
         </Grid>
         <Grid item xs={12} align="center">
-          <Button color="secondary" variant="contained" onClick={() => this.createGameButtonPressed()}>
+          <Button
+            color="secondary"
+            variant="contained"
+            onClick={() => this.createGameButtonPressed()}
+          >
             Create new game
           </Button>
         </Grid>
