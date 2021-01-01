@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import { render } from "react-dom";
-import { BrowserRouter as Router, Link, Switch, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Link,
+  Switch,
+  Route,
+  Redirect,
+} from "react-router-dom";
 import Game from "./Game";
 import Lobby from "./Lobby";
+import Login from "./Login";
 
 export default class App extends Component {
   constructor(props) {
@@ -10,6 +17,20 @@ export default class App extends Component {
     this.state = {
       gameId: "",
     };
+  }
+
+  login(token) {
+    this.setState({
+      token: token,
+      isLoggedIn: true,
+    });
+  }
+
+  logout() {
+    this.setState({
+      token: "",
+      isLoggedIn: false,
+    });
   }
 
   leaveGame() {
@@ -30,22 +51,32 @@ export default class App extends Component {
       <Router>
         <Switch>
           <Route
+            path="/login"
+            render={(props) => {
+              return (
+                <Login {...props} onLogin={(token) => this.login(token)} />
+              );
+            }}
+          ></Route>
+          <Route
             path="/game/:code"
             render={(props) => (
-              <Game
-                {...props}
-                leaveGameCallback={() => this.leaveGame()}
-              />
+              <Game {...props} leaveGameCallback={() => this.leaveGame()} />
             )}
           ></Route>
           <Route
             path="/"
-            render={(props) => (
-              <Lobby
-                {...props}
-                joinGameCallback={(data) => this.joinGame(data)}
-              />
-            )}
+            render={(props) => {
+              return this.state.isLoggedIn == true ? (
+                <Lobby
+                  {...props}
+                  joinGameCallback={(data) => this.joinGame(data)}
+                  onLogout={() => this.logout()}
+                />
+              ) : (
+                <Redirect to="/login"></Redirect>
+              );
+            }}
           ></Route>
         </Switch>
       </Router>

@@ -4,6 +4,7 @@ import CreateGame from "./CreateGame";
 import JoinGame from "./JoinGame";
 import SpectateGame from "./SpectateGame";
 import BoardGraphic from "./BoardGraphic";
+import Logout from "./Logout";
 import { Grid } from "@material-ui/core";
 
 class GameInLobby extends Component {
@@ -26,7 +27,6 @@ export default class Lobby extends Component {
 
   componentDidMount(){
     fetch("/api/games").then((res) => res.json()).then((data) => {
-      console.log("Data: " + data);
       this.setState({
         games: data,
       });
@@ -54,6 +54,9 @@ export default class Lobby extends Component {
             </Grid>
             <Grid item xs={4}>
               <Link to="/spectate-game">Spectate game</Link>
+            </Grid>
+            <Grid item xs={12}>
+              <Logout {...this.props} onLogout={() => this.props.onLogout()} />
             </Grid>
           </Grid>
           <Switch>

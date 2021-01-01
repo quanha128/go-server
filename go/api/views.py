@@ -3,16 +3,11 @@ from django.conf import settings
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-<<<<<<< HEAD
-from .models import *
-from .serial import GameSerializer, CreateGameSerializer, UpdateGameSerializer
-=======
 from .models import Game, Account
 from .serial import GameSerializer, CreateGameSerializer, LoginSerializer, SignupSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
 
 # Create your views here.
 
@@ -20,7 +15,6 @@ from rest_framework.authtoken.models import Token
 # conn = redis.StrictRedis(host=settings.REDIS_HOST,
 #                         port=settings.REDIS_PORT, db=0)
 
-<<<<<<< HEAD
 class GameView(generics.ListAPIView):
     queryset = Game.objects.all()
     serializer_class = GameSerializer
@@ -108,7 +102,6 @@ class CreateGameView(APIView):
                 return Response(GameSerializer(game).data, status=status.HTTP_201_CREATED)
 
         return Response({'Bad Request': 'Invalid data...'}, status=status.HTTP_400_BAD_REQUEST)
-=======
 # @api_view(['POST'])
 # def registration_view(request):
 #     #queryset = Account.objects.all() # For DEBUG
@@ -149,7 +142,6 @@ class UserList(generics.ListAPIView):
     queryset = Account.objects.all()
     serializer_class = LoginSerializer
 
-
 class UserDetail(generics.RetrieveAPIView):
     queryset = Account.objects.all()
     serializer_class = LoginSerializer
@@ -176,8 +168,23 @@ class LoginView(APIView):
                 return Response(data, status=status.HTTP_404_NOT_FOUND)
             else:
                 data['username'] = user.username
-                data['response'] = 'Hello' + user.username
                 return Response(data, status=status.HTTP_200_OK)
         else:
             return Response({'Not Found': 'Bs'}, status=status.HTTP_404_NOT_FOUND)
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
+
+class UserDetailsView(generics.RetrieveUpdateAPIView):
+    """
+    Reads and updates UserModel fields
+    Accepts GET, PUT, PATCH methods.
+
+    Default accepted fields: username, first_name, last_name
+    Default display fields: pk, username, email, first_name, last_name
+    Read-only fields: pk, email
+
+    Returns UserModel fields.
+    """
+    serializer_class = LoginSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user

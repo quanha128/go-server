@@ -1,17 +1,6 @@
-<<<<<<< HEAD
-from re import T
-from django.db import models
-import string, random
-
-BOARD_SIZE = 19
-
-def generate_game_code():
-=======
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinLengthValidator
-# from django.contrib.postgres.fields import ArrayField
-# from .helper import *
 import string, random
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -20,8 +9,7 @@ from django.conf import settings
 
 BOARD_SIZE = 19
 
-def generate_code():
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
+def generate_game_code():
     length = 6
     while True:
         code = ''.join(random.choices(string.ascii_letters, k=length))
@@ -29,7 +17,6 @@ def generate_code():
             break
     return code
 
-<<<<<<< HEAD
 def generate_chat_channel_code():
     length = 6
     while True:
@@ -46,8 +33,6 @@ def generate_chat_channel_code():
 #     chat_id = models.ForeignKey('Chatline', on_delete = models.SET_NULL, blank = True, null = True)
 #     avatar_url = models.CharField(max_length=255, default="")
 #     elo = models.IntegerField(null=False, default = 1000)
-=======
-
 
 # Create your models here.
 
@@ -83,7 +68,7 @@ class Account(AbstractBaseUser):
     is_active = models.BooleanField(default = True)
     is_staff = models.BooleanField(default = False)
     is_superuser = models.BooleanField(default = False)
-
+    elo = models.IntegerField(default=0)
     USERNAME_FIELD = 'username'
     REQUIRED_FIELD = ['username']
 
@@ -98,10 +83,10 @@ class Account(AbstractBaseUser):
     
     objects = MyAccountManager()
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def create_auth_token(sender, instance=None, created=False, **kwargs):
-    if created:
-        Token.objects.create(user=instance)
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_auth_token(sender, instance=None, created=False, **kwargs):
+#     if created:
+#         Token.objects.create(user=instance)
 
 class Player(models.Model):
     # user_id = models.ForeignKey(Account, on_delete = models.CASCADE)
@@ -111,12 +96,10 @@ class Player(models.Model):
     chat_id = models.ForeignKey('Chatline', on_delete = models.SET_NULL, blank = True, null = True)
     avatar_url = models.CharField(max_length=255, default="")
     elo = models.IntegerField(null=False, default = 1000)
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
 
 class Game(models.Model):
     # player1_id = models.ForeignKey(Player, related_name="P1", on_delete = models.SET_NULL, blank = True, null = True)
     # player2_id = models.ForeignKey(Player, related_name="P2", on_delete = models.SET_NULL, blank = True, null = True)
-<<<<<<< HEAD
     # board_state = ArrayField(
     #         models.CharField(null=False, default=".", max_length=1),
     #         size=19*19,
@@ -126,10 +109,6 @@ class Game(models.Model):
     ko = models.IntegerField(default=-1)
     code = models.CharField(default=generate_game_code, unique=True, max_length=6)
     chat_channel_code = models.CharField(default=generate_chat_channel_code, unique=True, max_length=6)
-=======
-    board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
-    code = models.CharField(default=generate_code, unique=True, max_length=6)
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
     host = models.CharField(max_length=10, unique=True)
     can_spectate = models.BooleanField(default=False, null=False)
     board_size = models.IntegerField(null=False, default=19)
@@ -138,14 +117,8 @@ class Game(models.Model):
     # time_end = models.DateTimeField(auto_now_add = True)
 
 class Chatline(models.Model):
-<<<<<<< HEAD
-    chat_channel_code = models.CharField(max_length=6, default=generate_chat_channel_code)
-    # sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
-    line = models.TextField(max_length=255, null=False)
-=======
     game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
     chat_id = models.CharField(max_length=255, default="")
     sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
     line = models.CharField(max_length=255, default="")
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
     time = models.DateTimeField(auto_now_add = True)

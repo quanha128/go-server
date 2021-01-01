@@ -1,36 +1,18 @@
 from rest_framework import serializers
-<<<<<<< HEAD
-from .models import Game
-=======
 from .models import Game,Player,Account
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
 
 class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = (
-<<<<<<< HEAD
-            'id', 'board_size', 'code', 'chat_channel_code', 'host', 'can_spectate', 'time_start', 'board_state',
-        )
-
-class UpdateGameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Game
-        fields = ('code', 'board_state')
-        
-=======
             'id', 'board_size', 'code', 'host', 'can_spectate', 'time_start',
         )
 
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
 class CreateGameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = (
             'board_size', 'can_spectate',
-<<<<<<< HEAD
-        )
-=======
         )
 
 class PlayerSerializer(serializers.ModelSerializer):
@@ -72,5 +54,4 @@ class SignupSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
-        fields = ['username', 'password']
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
+        fields = ['username', 'last_login', 'elo']

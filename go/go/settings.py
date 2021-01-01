@@ -32,17 +32,15 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'rest_framework',
-    'api',
     'frontend',
     'channels',
+    'api',
+    # for rest registration
     'django.contrib.sites',
     'allauth',
     'allauth.account',
     'rest_auth.registration',
     'rest_framework.authtoken',
-    'api',
-    'frontend',
-    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -146,10 +144,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-<<<<<<< HEAD
-# REDIS_HOST = 'localhost'
-# REDIS_PORT = 6379
-=======
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
@@ -157,4 +151,3 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ]
 }
->>>>>>> abc2fce016faeaa9b9b8f07b698df746ed2a443b
