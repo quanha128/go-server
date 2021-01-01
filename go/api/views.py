@@ -3,7 +3,7 @@ from django.conf import settings
 from rest_framework import serializers, status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Game, Account
+from .models import *
 from .serial import GameSerializer, CreateGameSerializer, LoginSerializer, SignupSerializer
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
