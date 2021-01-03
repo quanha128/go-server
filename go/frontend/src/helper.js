@@ -16,3 +16,19 @@ export function getCookie(name) {
 export function getCsrf(){
     return getCookie("csrftoken");
 }
+
+export function waitForSocketConnection(socket, callback, name){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log(`Connection ${name != null ? name : ""} is made`);
+                if (callback != null){
+                    callback();
+                }
+            } else {
+                console.log(`wait for connection ${name != null ? name : ""}...`)
+                waitForSocketConnection(socket, callback, name);
+            }
+
+        }, 5);
+}

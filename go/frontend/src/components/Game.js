@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import Chat from "./Chat";
+import Result from "./Result";
 import { GoPieceDef } from "./BoardGraphic";
 import {
   FormControl,
@@ -13,6 +14,7 @@ import {
   Typography,
 } from "@material-ui/core";
 import ultilities from "../../static/css/ultilities.module.css";
+import { waitForSocketConnection } from "../helper";
 
 const imagesPath = "../../static/images/";
 const positionConst = {
@@ -174,16 +176,18 @@ export default class Game extends Component {
             alert("End game!");
             let scores = data.scores;
             let win = true;
-            if(this.state.isWhite) {
+            if(this.state.isWhite == true) {
               win = data.scores.white > data.scores.black ? true : false;
             } else {
               win = data.scores.black > data.scores.white ? true : false;
-            }
-            alert(win);
+            } 
+            if(data.scores.black == data.scores.white)
+              win = "draw";
+            // get out of room
+            // this.props.leaveGameCallback();
+            console.log("Win or not");
             this.setState({win: win});
           } else {
-            console.log("received!");
-            console.log(this.state.isTurn);
             this.setState({
               lastHover: null,
               isTurn: this.state.isTurn == true ? false : true,
@@ -282,6 +286,7 @@ export default class Game extends Component {
   }
 
   leaveGameButtonPressed() {
+    // waitForSocketConnection(this.gameSocket, () => this.gameSocket.send(JSON.stringify({'signal': 'end_game'})), "leave");
     this.props.leaveGameCallback();
     this.gameSocket.send(JSON.stringify({'signal': 'end_game'}));
     this.gameSocket.close();
@@ -295,7 +300,7 @@ export default class Game extends Component {
       ((this.state.isTurn == true && this.state.isWhite == true) || (this.state.isTurn == false && this.state.isWhite == false)
         ? <React.Fragment>(White): <b>{this.whitePlayer}</b></React.Fragment>
         :<React.Fragment>(Black): <b>{this.blackPlayer}</b></React.Fragment>)}</Typography>);
-    return "win" in this.state  ? (<div>You {this.state.win == true ? "win" : "lose!"}</div>) : (
+    return "win" in this.state ? <Result result={this.state.win} leaveGameCallback={() => this.props.leaveGameCallback()}></Result> : (
       <div>
         <Button onClick={() => this.leaveGameButtonPressed()}>
           Leave game

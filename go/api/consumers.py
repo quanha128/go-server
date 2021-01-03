@@ -11,11 +11,11 @@ class GoConsumer(JsonWebsocketConsumer):
     def connect(self):
         self.code = self.scope['url_route']['kwargs']['code']
         self.game_group_name = 'game_%s' % self.code
+        
         async_to_sync(self.channel_layer.group_add)(
             self.game_group_name,
             self.channel_name
         )
-
         self.accept()
     
     def disconnect(self, close_code):
@@ -192,3 +192,37 @@ class LobbyConsumer(JsonWebsocketConsumer):
         games = event["games"] 
         print(games)
         self.send(text_data=json.dumps(games))
+        
+class WaitConsumer(JsonWebsocketConsumer):
+    def connect(self):
+        self.wait_group_name = 'wait_%s' % self.scope['url_route']['kwargs']['code']
+
+        async_to_sync(self.channel_layer.group_add)(
+            self.wait_group_name,
+            self.channel_name
+        )
+
+        self.accept()
+    
+    def disconnect(self, close_code):
+        async_to_sync(self.channel_layer.group_discard)(
+            self.wait_group_name,
+            self.channel_name
+        )
+
+    # Receive request
+    def receive(self, text_data):
+        text_data_json = json.loads(text_data)
+        if 'signal' in text_data_json:
+            if text_data_json["signal"] == "start-game":
+                async_to_sync(self.channel_layer.group_send)(
+                    self.wait_group_name,
+                    {
+                        'type': 'start_game',
+                        'signal': 'start-game'
+                    }
+                )
+    
+    def start_game(self, event):
+        signal = event["signal"] 
+        self.send(text_data=json.dumps({'signal': signal}))

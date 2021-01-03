@@ -63,7 +63,8 @@ export default class CreateGame extends Component {
         console.log(data);
         this.props.onCreateGame();
         this.props.joinGameCallback(data);
-        this.props.history.push(`/game/${data.code}`);
+        this.props.history.push(`/waiting`);
+        // this.props.history.push(`/game/${data.code}`);
       })
       .catch((e) => {
         console.log("error");

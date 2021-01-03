@@ -7,6 +7,7 @@ urlpatterns = [
     path('login', index),
     path('signup', index),
     path('lobby', index),
+    path('waiting', index),
     path('create-game', index),
     path('join-game', index),
     path('spectate-game', index),

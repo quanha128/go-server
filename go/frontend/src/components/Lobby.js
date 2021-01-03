@@ -5,7 +5,7 @@ import JoinGame from "./JoinGame";
 import SpectateGame from "./SpectateGame";
 import BoardGraphic from "./BoardGraphic";
 import Logout from "./Logout";
-
+import { getCsrf, waitForSocketConnection } from "../helper";
 import {
   Grid,
   Typography,
@@ -53,9 +53,20 @@ class GameInLobby extends Component {
           ></img>
         </div>
         <Typography variant="h5">{this.props.info.name}</Typography>
-        <Typography style={{"font-size": "14px", color: "grey"}}>Host: {this.props.info.host}</Typography>
-        <Button size="small" color="primary">
-          <Link to={`/game/${this.props.info.code}`}>Join</Link>
+        <Typography style={{ "font-size": "14px", color: "grey" }}>
+          Host: {this.props.info.host}
+        </Typography>
+        <Button
+          size="small"
+          color="primary"
+          onClick={() =>
+            this.props.onJoinGame({
+              code: this.props.info.code,
+              name: this.props.info.name,
+            })
+          }
+        >
+          Join
         </Button>
       </Box>
       //     {/* </CardContent>
@@ -85,6 +96,44 @@ export default class Lobby extends Component {
     }
   }
 
+  onJoinGame(data) {
+    let code = data.code;
+    let name = data.name;
+    console.log("Code and data");
+    console.log({ code: code, name: name });
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+      body: JSON.stringify({
+        game_name: name,
+        code: code,
+        password: "",
+        can_spectate: true,
+      }),
+    };
+    console.log("Trying to join!");
+    fetch("/api/join-game", requestOptions)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data["Bad request"]) {
+          alert(data["Bad request"]);
+          return;
+        }
+        console.log("Join game");
+        console.log(data);
+        // notify the host that i am in
+        let waitURL =
+          "ws://" + window.location.host + "/ws/wait/" + data.code + "/";
+        this.waitSocket = new WebSocket(waitURL);
+        waitForSocketConnection(this.waitSocket, () => {
+          this.waitSocket.send(JSON.stringify({ signal: "start-game" }));
+          this.waitSocket.close();
+        }, "startgame");
+        this.props.joinGameCallback(data);
+        this.props.history.push(`/game/${data.code}`);
+      });
+  }
+
   componentDidMount() {
     fetch("/api/games")
       .then((res) => res.json())
@@ -92,7 +141,6 @@ export default class Lobby extends Component {
         this.setState({
           games: data,
         });
-        console.log(this.state.games);
       });
     const lobbyURL = "ws://" + window.location.host + "/ws/lobby/";
     this.lobbySocket = new WebSocket(lobbyURL);
@@ -119,7 +167,12 @@ export default class Lobby extends Component {
       games.length > 0 ? (
         games.map((game) => (
           <Grid item xs={12}>
-            <GameInLobby key={game.id} id={game.id} info={game}></GameInLobby>
+            <GameInLobby
+              key={game.id}
+              id={game.id}
+              info={game}
+              onJoinGame={(data) => this.onJoinGame(data)}
+            ></GameInLobby>
           </Grid>
         ))
       ) : (
@@ -159,7 +212,7 @@ export default class Lobby extends Component {
             <Grid item xs={12}>
               <JoinGame
                 {...this.props}
-                joinGameCallback={(data) => this.props.joinGameCallback(data)}
+                joinGameCallback={(data) => this.onJoinGame(data)}
               />
             </Grid>
             {/* <Router>

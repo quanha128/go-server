@@ -71,14 +71,14 @@ class JoinGame(APIView):
         if code != None:
             games = Game.objects.filter(code=code)
             if len(games) > 0:
-                if game[0].start == True:
+                if games[0].start == True:
                     return Response({'Bad Request': 'Room is occupied.'}, status=status.HTTP_400_BAD_REQUEST)
-                game = game[0]
+                game = games[0]
                 game.other = self.request.user.username
                 game.start = True
                 game.save()
-                data = GameSerializer(games[0]).data
-                data['is_host'] = self.request.session.session_key == games[0].host
+                data = GameSerializer(game).data
+                data['is_host'] = self.request.session.session_key == game.host
                 return Response(data, status=status.HTTP_200_OK)
             return Response({'Room Not Found': 'Invalid Room Code.'}, status=status.HTTP_404_NOT_FOUND)
         
@@ -173,15 +173,17 @@ class LeaveGame(APIView):
         gamePlay = Game.objects.filter(other=username)
         if len(gameHost) > 0:
             game = gameHost[0]
-            game.delete()
+            game.host = ""
+            # game.delete()
             return Response({"message": "Delete game successfully."}, status=status.HTTP_200_OK)
         elif len(gamePlay):
             game = gamePlay[0]
             game.other = ""
-            game.start = False
+            # game.start = False
+            # game.delete()
             return Response({"message":"Leave game successfully"}, status=status.HTTP_200_OK)
         else:
-            return Response({"Bad request": "You is not in any room."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"Bad request": "You are not in any room."}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserList(generics.ListAPIView):
     queryset = Account.objects.all()

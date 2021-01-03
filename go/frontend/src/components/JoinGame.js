@@ -39,25 +39,32 @@ export default class JoinGame extends Component {
   }
 
   joinGameButtonPressed() {
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
-      body: JSON.stringify({
-        game_name: this.state.gameName,
-        code: this.state.gameCode,
-        password: this.state.password,
-        can_spectate: true,
-      }),
-    };
-    console.log(requestOptions);
-    fetch("/api/join-game", requestOptions)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Join game");
-        console.log(data);
-        this.props.joinGameCallback(data);
-        this.props.history.push(`/game/${data.code}`);
-      });
+    this.props.joinGameCallback({code: this.state.gameCode, name: this.state.gameName});
+    // const requestOptions = {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
+    //   body: JSON.stringify({
+    //     game_name: this.state.gameName,
+    //     code: this.state.gameCode,
+    //     password: this.state.password,
+    //     can_spectate: true,
+    //   }),
+    // };
+    // console.log("Trying to join!");
+    // fetch("/api/join-game", requestOptions)
+    //   .then((res) => res.json())
+    //   .then((data) => {
+    //     console.log("Join game");
+    //     console.log(data);
+    //     // notify the host that i am in
+    //     let waitURL = "ws://" + window.location.host + "/ws/wait/" + this.props.code + "/";
+    //     this.waitSocket = new WebSocket(waitURL);
+    //     this.waitSocket.send(JSON.stringify({'signal': 'start-game'}));
+    //     this.waitSocket.close();
+
+    //     this.props.joinGameCallback(data);
+    //     this.props.history.push(`/game/${data.code}`);
+    //   });
   }
 
   render() {
