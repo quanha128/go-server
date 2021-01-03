@@ -90,7 +90,6 @@ export default class Lobby extends Component {
   onCreateGame() {
     if (this.lobbySocket) {
       this.lobbySocket.send(JSON.stringify({ signal: "create-game" }));
-      this.lobbySocket.close();
     } else {
       console.log("Cannot find lobby socket.");
     }
@@ -113,14 +112,17 @@ export default class Lobby extends Component {
     };
     console.log("Trying to join!");
     fetch("/api/join-game", requestOptions)
-      .then((res) => res.json())
+      .then((res) => {
+        if(!res.ok){
+          alert("Cannot join.");
+        }
+        return res.json()
+      })
       .then((data) => {
         if (data["Bad request"]) {
-          alert(data["Bad request"]);
+          alert("Cannot join.");
           return;
         }
-        console.log("Join game");
-        console.log(data);
         // notify the host that i am in
         let waitURL =
           "ws://" + window.location.host + "/ws/wait/" + data.code + "/";
@@ -142,22 +144,24 @@ export default class Lobby extends Component {
           games: data,
         });
       });
-    const lobbyURL = "ws://" + window.location.host + "/ws/lobby/";
-    this.lobbySocket = new WebSocket(lobbyURL);
-    this.lobbySocket.onmessage = (e) => {
-      let data = JSON.parse(e.data);
-      if (data.message) {
-        console.log(data.message);
-      } else {
-        console.log(data);
-        this.setState({
-          games: data,
-        });
-      }
-    };
-    this.lobbySocket.onclose = (e) => {
-      console.log("Lobby socket closedf unexpectedly.");
-    };
+    if(this.lobbySocket){
+      const lobbyURL = "ws://" + window.location.host + "/ws/lobby/";
+      this.lobbySocket = new WebSocket(lobbyURL);
+      this.lobbySocket.onmessage = (e) => {
+        let data = JSON.parse(e.data);
+        if (data.message) {
+          console.log(data.message);
+        } else {
+          console.log(data);
+          this.setState({
+            games: data,
+          });
+        }
+      };
+      this.lobbySocket.onclose = (e) => {
+        console.log("Lobby socket closedf unexpectedly.");
+      };
+    }
   }
 
   render() {
