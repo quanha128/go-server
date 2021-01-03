@@ -11,12 +11,13 @@ import { getCookie } from "../helper";
 import Game from "./Game";
 import Lobby from "./Lobby";
 import Login from "./Login";
+import Signup from "./Signup";
+import NavBar from "./NavBar";
 
 export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      gameId: "",
       isLoggedIn: null,
     };
   }
@@ -28,12 +29,14 @@ export default class App extends Component {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
     };
+
     fetch("/api/is-logged-in", requestOptions)
       .then((res) => res.json())
       .then((data) => {
+        console.log("Is logged In");
         console.log(data);
-        this.setState({ isLoggedIn: data.is_logged_in });
-        this.forceUpdate();
+        this.setState({ isLoggedIn: data.is_logged_in, username: data.username, code: data.code ? data.code : null});
+        console.log(this.state);
       });
   }
 
@@ -52,14 +55,22 @@ export default class App extends Component {
   }
 
   leaveGame() {
-    this.setState({
-      gameId: "",
-    });
+    const csrftoken = getCookie("csrftoken");
+    const requestOptions = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken },
+    };
+    fetch("/api/leave-game", requestOptions).then((res) => res.json()).then((data) => {
+      console.log("leave game: ");
+      console.log(data);
+      this.setState({
+        code: "",
+      })});
   }
 
   joinGame(data) {
     this.setState({
-      gameId: data.code,
+      code: data.code,
     });
     // check if game is still up
   }
@@ -68,19 +79,30 @@ export default class App extends Component {
     return (
       <Router>
         <Switch>
+        <Route
+            path="/game/:code"
+            render={(props) => (
+              <Game {...props} leaveGameCallback={() => this.leaveGame()} />
+            )}
+          ></Route>
           <Route
             exact
             path="/"
             render={(props) => {
-              return this.state.isLoggedIn == true ? (
+              let  r = this.state.isLoggedIn == true ? (
+                <React.Fragment>
+                <NavBar {...props} username={this.state.username} onLogout={() => this.logout()}></NavBar> 
                 <Lobby
                   {...props}
                   joinGameCallback={(data) => this.joinGame(data)}
                   onLogout={() => this.logout()}
                 />
+                </React.Fragment>
               ) : (
                 <Redirect to="/login"></Redirect>
               );
+              r = this.state.code ? (<Redirect to={`/game/${this.state.code}`}></Redirect>) : r;
+              return r;
             }}
           ></Route>
           <Route
@@ -94,9 +116,9 @@ export default class App extends Component {
             }}
           ></Route>
           <Route
-            path="/game/:code"
+            path="/signup"
             render={(props) => (
-              <Game {...props} leaveGameCallback={() => this.leaveGame()} />
+              <Signup {...props}/>
             )}
           ></Route>
         </Switch>

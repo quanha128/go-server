@@ -25,6 +25,7 @@ def generate_chat_channel_code():
             break
     return code
 
+
 # Create your models here.
 # class Player(models.Model):
 #     game_id = models.ForeignKey('Game', on_delete = models.SET_NULL, blank = True, null = True)
@@ -98,18 +99,18 @@ class Player(models.Model):
     elo = models.IntegerField(null=False, default = 1000)
 
 class Game(models.Model):
-    # player1_id = models.ForeignKey(Player, related_name="P1", on_delete = models.SET_NULL, blank = True, null = True)
-    # player2_id = models.ForeignKey(Player, related_name="P2", on_delete = models.SET_NULL, blank = True, null = True)
-    # board_state = ArrayField(
-    #         models.CharField(null=False, default=".", max_length=1),
-    #         size=19*19,
-    #     )
+    # whose is white
+    white_is_host = models.BooleanField(default=True, null=False)
+    playing_color = models.CharField(default="white", max_length=32, null=False)
     name = models.CharField(default="New Game", max_length=50, null=False)
     board_state = models.CharField(default="", max_length=BOARD_SIZE**2)
     ko = models.IntegerField(default=-1)
     code = models.CharField(default=generate_game_code, unique=True, max_length=6)
     chat_channel_code = models.CharField(default=generate_chat_channel_code, unique=True, max_length=6)
     host = models.CharField(max_length=10, unique=True)
+    passes = models.IntegerField(default=0)
+    other = models.CharField(max_length=32, default="")
+    start = models.BooleanField(default=False)
     can_spectate = models.BooleanField(default=False, null=False)
     board_size = models.IntegerField(null=False, default=19)
     #player_turn = models.IntergerField(null=False, defalut = 0)
@@ -119,6 +120,7 @@ class Game(models.Model):
 class Chatline(models.Model):
     # game_id = models.ForeignKey(Game, on_delete = models.CASCADE)
     chat_channel_code = models.CharField(max_length=255, default="")
+    sender = models.CharField(max_length=32)
     # sayer = models.ForeignKey(Player, on_delete = models.SET_NULL, blank = True, null = True)
     line = models.CharField(max_length=255, default="")
     time = models.DateTimeField(auto_now_add = True)

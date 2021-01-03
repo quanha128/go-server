@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { palette } from '@material-ui/system';
 import {
   Grid,
   Input,
@@ -10,7 +11,10 @@ import {
   Checkbox,
   FormGroup,
   Button,
+  Box,
+  Typography,
 } from "@material-ui/core";
+import { getCsrf } from "../helper";
 
 export default class JoinGame extends Component {
   constructor(props) {
@@ -34,10 +38,10 @@ export default class JoinGame extends Component {
     });
   }
 
-  joinGameButtonPressed(){
+  joinGameButtonPressed() {
     const requestOptions = {
       method: "POST",
-      headers: {'Content-Type': 'application/json'},
+      headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrf() },
       body: JSON.stringify({
         game_name: this.state.gameName,
         code: this.state.gameCode,
@@ -46,43 +50,59 @@ export default class JoinGame extends Component {
       }),
     };
     console.log(requestOptions);
-    fetch("/api/join-game", requestOptions).then((res) => res.json()).then((data) => {
-      console.log("Join game");
-      console.log(data);
-      this.props.joinGameCallback(data);
-      this.props.history.push(`/game/${data.code}`);
-    })
+    fetch("/api/join-game", requestOptions)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log("Join game");
+        console.log(data);
+        this.props.joinGameCallback(data);
+        this.props.history.push(`/game/${data.code}`);
+      });
   }
 
   render() {
     return (
-      <Grid container spacing={0}>
-        <Grid item xs={12} align="left">
-          Join game
-        </Grid>
-        <Grid item xs={12} align="left">
-          <FormControl component="fieldset">
-            <InputLabel>Room name</InputLabel>
-            <Input
-              placeholder="Type your game name"
-              required
-              name="gameName"
-              onChange={(e) => this.changeInputField(e)}
-            ></Input>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} align="left">
-          <FormControl component="fieldset">
-            <InputLabel>Game code</InputLabel>
-            <Input
-              placeholder="Type your game code"
-              required
-              name="gameCode"
-              onChange={(e) => this.changeInputField(e)}
-            ></Input>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} align="left">
+      <Box
+        color={"secondary.main"}
+        bgcolor={"white"}
+        border={1}
+        borderColor={"grey.500"}
+        borderRadius={10}
+        padding={5}
+        marginTop={5}
+        marginLeft={"auto"}
+        marginRight={"auto"}
+        display={"block"}
+        width={"60%"}
+        boxShadow={"0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"}
+      >
+        <Grid container spacing={0}>
+          <Grid item xs={12} align="center">
+            <Typography variant="h5">Join game</Typography>
+          </Grid>
+          <Grid item xs={12} align="left">
+            <FormControl component="fieldset">
+              <InputLabel>Room name</InputLabel>
+              <Input
+                placeholder="Type your game name"
+                required
+                name="gameName"
+                onChange={(e) => this.changeInputField(e)}
+              ></Input>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} align="left">
+            <FormControl component="fieldset">
+              <InputLabel>Game code</InputLabel>
+              <Input
+                placeholder="Type your game code"
+                required
+                name="gameCode"
+                onChange={(e) => this.changeInputField(e)}
+              ></Input>
+            </FormControl>
+          </Grid>
+          {/* <Grid item xs={12} align="left">
           <Checkbox
             value="havePassword"
             checked={this.state.havePassword}
@@ -97,13 +117,17 @@ export default class JoinGame extends Component {
               onChange={(e) => this.changeInputField(e)}
             ></Input>
           </FormControl>
+        </Grid> */}
+          <Grid item xs={12} align="center">
+            <Button
+              color="secondary"
+              onClick={() => this.joinGameButtonPressed()}
+            >
+              Join game
+            </Button>
+          </Grid>
         </Grid>
-        <Grid item xs={12} align="center">
-          <Button color="secondary" variant="contained" onClick={() => this.joinGameButtonPressed()}>
-            Join game
-          </Button>
-        </Grid>
-      </Grid>
+      </Box>
     );
   }
 }

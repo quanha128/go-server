@@ -9,6 +9,8 @@ import {
   FormHelperText,
   Grid,
   Button,
+  Box,
+  Typography,
 } from "@material-ui/core";
 import ultilities from "../../static/css/ultilities.module.css";
 
@@ -48,18 +50,19 @@ function Square(props) {
     props.value == BLACK_GHOST || props.value == WHITE_GHOST
       ? ultilities["ghost"]
       : "";
-  const goPiece = (<React.Fragment>
-    <GoPieceDef />
-    <svg height="23" width="23" className={ghostClass}>
-      <circle
-        cx="50%"
-        cy="50%"
-        r="45%"
-        fill={`url(${
-          props.value.includes(BLACK) ? "#blackPiece" : "#whitePiece"
-        })`}
-      />
-    </svg>
+  const goPiece = (
+    <React.Fragment>
+      <GoPieceDef />
+      <svg height="23" width="23" className={ghostClass}>
+        <circle
+          cx="50%"
+          cy="50%"
+          r="45%"
+          fill={`url(${
+            props.value.includes(BLACK) ? "#blackPiece" : "#whitePiece"
+          })`}
+        />
+      </svg>
     </React.Fragment>
   );
   let goSquare = props.value == EMPTY ? null : goPiece;
@@ -95,21 +98,21 @@ class Board extends Component {
         positionFlag |= ii != size - 1 ? positionConst.BOTTOM : 0;
         positionFlag |= jj != 0 ? positionConst.RIGHT : 0;
         positionFlag |= jj != size - 1 ? positionConst.LEFT : 0;
-        if(size == 19){
+        if (size == 19) {
           const iidx = [3, 9, 15];
           const jjdx = [3, 9, 15];
-          if(iidx.includes(ii) && jjdx.includes(jj))
+          if (iidx.includes(ii) && jjdx.includes(jj))
             positionFlag = positionConst.DOT;
-        } else if(size == 13){
+        } else if (size == 13) {
           const iidx = [3, 9];
           const jjdx = [3, 9];
-          if((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 6 && ii == 6))
-          positionFlag = positionConst.DOT;
-        } else if(size == 9){
+          if ((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 6 && ii == 6))
+            positionFlag = positionConst.DOT;
+        } else if (size == 9) {
           const iidx = [2, 6];
           const jjdx = [2, 6];
-          if((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 4 && ii == 4))
-          positionFlag = positionConst.DOT;
+          if ((iidx.includes(ii) && jjdx.includes(jj)) || (jj == 4 && ii == 4))
+            positionFlag = positionConst.DOT;
         }
         return (
           <Square
@@ -126,7 +129,7 @@ class Board extends Component {
         <Grid
           item
           xs={12}
-          alignItems={"center"}
+          align="center"
           style={{ display: "inline-flex" }}
         >
           {line}
@@ -134,7 +137,7 @@ class Board extends Component {
       );
     }
     return (
-      <Grid container justify="center" spacing={0}>
+      <Grid container spacing={0}>
         {lineSquares}
       </Grid>
     );
@@ -150,34 +153,45 @@ export default class Game extends Component {
       boardArray: Array(19 * 19).fill("."),
       isWhite: true,
       isTurn: true,
-      whitePlayer: "game_id1",
-      blackPlayer: "game_id2",
       chatLog: [],
       legalMove: true,
     };
+    this.whitePlayer = "game_id1";
+    this.blackPlayer = "game_id2";
     fetch(`/api/get-game?code=${this.gameCode}`)
       .then((res) => res.json())
       .then((data) => {
         // connect chat channel
         // init game websocket
         let gameSocketURL =
-          "ws://" + window.location.host + "/ws/" + data.code + "/";
-        console.log(gameSocketURL);
+          "ws://" + window.location.host + "/ws/game/" + data.code + "/";
         this.gameSocket = new WebSocket(gameSocketURL);
         this.gameSocket.onmessage = (e) => {
           let data = JSON.parse(e.data);
-          if(data.message){
-            alert(data.message);
-          } else{
-            let isWhite = this.state.isWhite;
-            console.log("Received board state: ");
-            console.log(data.board_state);
+          if (data.message) {
+            alert("Invalid move!");
+          } else if(data.signal == "end_game"){
+            alert("End game!");
+            let scores = data.scores;
+            let win = true;
+            if(this.state.isWhite) {
+              win = data.scores.white > data.scores.black ? true : false;
+            } else {
+              win = data.scores.black > data.scores.white ? true : false;
+            }
+            alert(win);
+            this.setState({win: win});
+          } else {
+            console.log("received!");
+            console.log(this.state.isTurn);
             this.setState({
               lastHover: null,
-              isWhite: isWhite == true ? false : true,
-              boardArray: data.board_state != null ? data.board_state.split("") : this.state.boardArray,
+              isTurn: this.state.isTurn == true ? false : true,
+              boardArray:
+                data.board_state != null
+                  ? data.board_state.split("")
+                  : this.state.boardArray,
             });
-            console.log(this.state.boardArray);
           }
         };
         this.gameSocket.onclose = (e) => {
@@ -186,20 +200,33 @@ export default class Game extends Component {
         /****/
         // init chat websocket
         let chatSocketURL = `ws://${window.location.host}/ws/chat/${data.chat_channel_code}/`;
-        console.log(chatSocketURL);
         this.chatSocket = new WebSocket(chatSocketURL);
         this.chatSocket.onmessage = (e) => {
           let data = JSON.parse(e.data);
           let chatLog = this.state.chatLog;
           this.setState({
-            chatLog: chatLog.concat({ sender: "thanh", message: data.message }),
+            chatLog: chatLog.concat({
+              sender: data.sender,
+              message: data.message,
+            }),
           });
         };
         this.chatSocket.onclose = (e) => {
           console.error("Chat socket closed unexpectedly");
         };
         // set value
+        // is the player playing white or black
+        const isWhite = data.is_host == data.white_is_host ? true : false;
+        let isTurn;
+        if (
+          (isWhite && data.playing_color == "white") ||
+          (!isWhite && data.playing_color == "black")
+        )
+          isTurn = true;
+        else isTurn = false;
         this.setState({
+          isTurn: isTurn,
+          isWhite: isWhite,
           gameChannelCode: data.code,
           chatChannelCode: data.chat_channel_code,
           boardArray: data.board_state.split(""),
@@ -209,6 +236,10 @@ export default class Game extends Component {
   }
 
   onPlayerMove(idx) {
+    if (!this.state.isTurn) {
+      alert("Not your turn.");
+      return;
+    }
     const isWhite = this.state.isWhite;
     let boardArray = this.state.boardArray.slice();
     if (
@@ -218,7 +249,7 @@ export default class Game extends Component {
     ) {
       let move = isWhite === true ? WHITE : BLACK;
       // send boardArray to channel
-      this.gameSocket.send(JSON.stringify({ 'ko': idx, 'color': move }));
+      this.gameSocket.send(JSON.stringify({ ko: idx, color: move }));
     }
   }
 
@@ -229,12 +260,10 @@ export default class Game extends Component {
     if (boardArray[idx] == WHITE || boardArray[idx] == BLACK) return;
     if (boardArray[idx] == EMPTY) {
       boardArray[idx] = isWhite === true ? WHITE_GHOST : BLACK_GHOST;
-      console.log(boardArray[idx]);
       // fetch api here to update board state
     }
     this.setState({
       lastHover: idx,
-      isWhite: isWhite,
       boardArray: boardArray,
     });
   }
@@ -243,31 +272,46 @@ export default class Game extends Component {
     this.chatSocket.send(JSON.stringify({ message: message }));
   }
 
+  passButtonPressed(){
+    if(this.state.isTurn == true){
+      alert("You passed your turn.");
+      this.gameSocket.send(JSON.stringify({'signal': 'pass'}));
+    }
+    else
+      alert("It is not your turn!");
+  }
+
   leaveGameButtonPressed() {
     this.props.leaveGameCallback();
+    this.gameSocket.send(JSON.stringify({'signal': 'end_game'}));
+    this.gameSocket.close();
+    this.chatSocket.close();
     this.props.history.push("/");
   }
 
   render() {
     let crntPlayer =
-      "Current player" +
-      (this.state.isWhite
-        ? `(White): ${this.state.whitePlayer}`
-        : `(Black): ${this.state.blackPlayer}`);
-    return (
+    (<Typography>Current player {
+      ((this.state.isTurn == true && this.state.isWhite == true) || (this.state.isTurn == false && this.state.isWhite == false)
+        ? <React.Fragment>(White): <b>{this.whitePlayer}</b></React.Fragment>
+        :<React.Fragment>(Black): <b>{this.blackPlayer}</b></React.Fragment>)}</Typography>);
+    return "win" in this.state  ? (<div>You {this.state.win == true ? "win" : "lose!"}</div>) : (
       <div>
-        <button onClick={() => this.leaveGameButtonPressed()}>
+        <Button onClick={() => this.leaveGameButtonPressed()}>
           Leave game
-        </button>
-        <div>{crntPlayer}</div>
-        <Grid container spacing={4}>
+        </Button>
+        {crntPlayer}
+        <Grid container spacing={4} marginTop={5}>
           <Grid item xs={8}>
-            <Board
-              boardArray={this.state.boardArray}
-              onClick={(idx) => this.onPlayerMove(idx)}
-              onMouseEnter={(idx) => this.onPlayerHover(idx)}
-            />
+            <Box paddingLeft={"25%"}>
+              <Board
+                boardArray={this.state.boardArray}
+                onClick={(idx) => this.onPlayerMove(idx)}
+                onMouseEnter={(idx) => this.onPlayerHover(idx)}
+              />
+            </Box>
           </Grid>
+
           <Grid item xs={4}>
             <Chat
               chatLog={this.state.chatLog}
@@ -275,6 +319,9 @@ export default class Game extends Component {
             />
           </Grid>
         </Grid>
+        <Button onClick={() => this.passButtonPressed()}>
+          Pass
+        </Button>
       </div>
     );
   }

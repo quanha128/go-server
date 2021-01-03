@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { getCookie } from "../helper";
+import { Link } from "react-router-dom";
 
 import {
   FormControl,
@@ -9,6 +10,8 @@ import {
   Grid,
   Button,
   FormHelperText,
+  Typography,
+  Box,
 } from "@material-ui/core";
 
 export default class Login extends Component {
@@ -33,51 +36,67 @@ export default class Login extends Component {
       }),
     };
     fetch("/rest-auth/login/", requestOptions)
-      .then((res) => res.json())
+      .then((res) => {
+        return res.json();
+      })
       .then((data) => {
-        if(data.error){
-            // bla bla
-        } else{
-            this.props.onLogin(data.key);
-            this.props.history.push("/");
+        if (data["non_field_errors"]) alert(data["non_field_errors"]);
+        else {
+          this.props.onLogin(data.key);
+          this.props.history.push("/");
         }
       });
   }
 
   render() {
     return (
-      <Grid container spacing={1}>
-        <Grid item xs={12}>
-          <FormControl>
-            <InputLabel htmlFor="username">Username</InputLabel>
-            <Input
-            name="username"
-              id="username"
-              onChange={(e) => this.changeInputField(e)}
-            ></Input>
-          </FormControl>
+      <Box
+        border={1}
+        borderColor="grey.500"
+        borderRadius={10}
+        padding={5}
+        marginTop={5}
+        marginLeft={"auto"}
+        marginRight={"auto"}
+        display={"block"}
+        width={"20%"}
+        boxShadow={"0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"}
+      >
+        <Grid container spacing={1}>
+          <Grid item xs={12} align="center">
+            <Typography variant="h4">Log in</Typography>
+          </Grid>
+          <Grid item xs={12} align="center">
+            <FormControl>
+              <InputLabel htmlFor="username">Username</InputLabel>
+              <Input
+                name="username"
+                id="username"
+                onChange={(e) => this.changeInputField(e)}
+              ></Input>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} align="center">
+            <FormControl>
+              <InputLabel htmlFor="password">Password</InputLabel>
+              <Input
+                name="password"
+                id="password"
+                type="password"
+                onChange={(e) => this.changeInputField(e)}
+              ></Input>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} align="center">
+            <Button color="primary" onClick={() => this.login()}>
+              Login
+            </Button>
+          </Grid>
+          <Grid item xs={12} align="left">
+            <Link to="/signup">Don't have account? Sign up</Link>
+          </Grid>
         </Grid>
-        <Grid item xs={12}>
-          <FormControl>
-            <InputLabel htmlFor="password">Password</InputLabel>
-            <Input
-            name="password"
-              id="password"
-              type="password"
-              onChange={(e) => this.changeInputField(e)}
-            ></Input>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12}>
-          <Button
-            color="secondary"
-            variant="container"
-            onClick={() => this.login()}
-          >
-            Login
-          </Button>
-        </Grid>
-      </Grid>
+      </Box>
     );
   }
 }

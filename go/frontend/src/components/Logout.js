@@ -22,6 +22,6 @@ export default class Logout extends Component {
     }
 
     render(){
-        return (<Button varient="contained" color="primary" onClick={() => this.onLogout()}>Logout</Button>)
+        return (<Button color="inherit" className={this.props.className} onClick={() => this.onLogout()}>Logout</Button>)
     }
 }

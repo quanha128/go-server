@@ -11,6 +11,7 @@ urlpatterns = [
     path('update-game', UpdateGame.as_view()),
     path('signup', SignupView.as_view()),
     path('is-logged-in', IsLoggedIn.as_view()),
+    path('leave-game', LeaveGame.as_view()),
     path('users/', UserList.as_view()),
     path('users/<int:pk>/', UserDetail.as_view()),
     path('details', UserDetailsView.as_view()),

@@ -6,6 +6,7 @@ import {
   FormHelperText,
   Grid,
   Button,
+  Typography,
 } from "@material-ui/core";
 import React, { Component } from "react";
 import { extend } from "lodash";
@@ -14,7 +15,7 @@ import ultilities from "../../static/css/ultilities.module.css";
 function ChatLine(props) {
   return (
     <div>
-      From {props.sender}: {props.message}
+      <b>{props.sender}</b>: {props.message}
     </div>
   );
 }
@@ -42,45 +43,57 @@ export default class Chat extends Component {
     super(props);
     this.state = {
       message: "",
-    }
+    };
   }
 
-  onTypeMessage(event){
+  onTypeMessage(event) {
     console.log(event.target.value);
     this.setState({
-      'message': event.target.value,
-    })
+      message: event.target.value,
+    });
   }
 
-  onSendingMessage(){
-      this.setState({message: ""});
-      this.props.onSendingMessage(this.state.message);
+  onSendingMessage() {
+    this.setState({ message: "" });
+    this.props.onSendingMessage(this.state.message);
   }
 
-  onKeyDown(e){
+  onKeyDown(e) {
     console.log(e.keyCode);
-    if(e.keyCode == 13) // if ENTER key is pressed
+    if (e.keyCode == 13)
+      // if ENTER key is pressed
       this.onSendingMessage();
   }
 
   render() {
     return (
       <div className={ultilities.topBottomContainer}>
+        <Typography align="center" variant="h5">
+          Chat
+        </Typography>
         <ChatLog chatLog={this.props.chatLog} />
         <div className={ultilities.bottomElement}>
-          <FormControl>
-            <TextField label="Message" value={this.state.message} onKeyDown={(e) => this.onKeyDown(e)} onChange={(e) => this.onTypeMessage(e)}></TextField>
-            <FormHelperText id="my-helper-text">
-              Type your message here.
-            </FormHelperText>
-          </FormControl>
-          <Button
-            color="secondary"
-            variant="contained"
-            onClick={() => this.onSendingMessage()}
-          >
-            Sned game
-          </Button>
+          <Grid container spacing={1}>
+            <Grid item xs={10}>
+              <FormControl>
+                <TextField
+                  label="Message"
+                  value={this.state.message}
+                  onKeyDown={(e) => this.onKeyDown(e)}
+                  onChange={(e) => this.onTypeMessage(e)}
+                  fullWidth={true}
+                ></TextField>
+                <FormHelperText id="my-helper-text">
+                  Type your message here.
+                </FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={2}>
+              <Button color="primary" onClick={() => this.onSendingMessage()}>
+                Send
+              </Button>
+            </Grid>
+          </Grid>
         </div>
       </div>
     );
