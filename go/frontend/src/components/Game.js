@@ -305,7 +305,7 @@ export default class Game extends Component {
         <Button onClick={() => this.leaveGameButtonPressed()}>
           Leave game
         </Button>
-        {crntPlayer}
+        {/* {crntPlayer} */}
         <Grid container spacing={4} marginTop={5}>
           <Grid item xs={8}>
             <Box paddingLeft={"25%"}>
@@ -317,7 +317,7 @@ export default class Game extends Component {
             </Box>
           </Grid>
 
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <Chat
               chatLog={this.state.chatLog}
               onSendingMessage={(message) => this.onSendingMessage(message)}

@@ -25,6 +25,13 @@ export default class Login extends Component {
     });
   }
 
+  onKeyDown(e) {
+    console.log(e.keyCode);
+    if (e.keyCode == 13)
+      // if ENTER key is pressed
+      this.login();
+  }
+
   login() {
     const csrftoken = getCookie("csrftoken");
     const requestOptions = {
@@ -60,6 +67,7 @@ export default class Login extends Component {
         marginRight={"auto"}
         display={"block"}
         width={"20%"}
+        bgcolor={"white"}
         boxShadow={"0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19)"}
       >
         <Grid container spacing={1}>
@@ -84,6 +92,7 @@ export default class Login extends Component {
                 id="password"
                 type="password"
                 onChange={(e) => this.changeInputField(e)}
+                onKeyDown={(e) => this.onKeyDown(e)}
               ></Input>
             </FormControl>
           </Grid>

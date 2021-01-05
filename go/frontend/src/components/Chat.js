@@ -7,6 +7,7 @@ import {
   Grid,
   Button,
   Typography,
+  Box,
 } from "@material-ui/core";
 import React, { Component } from "react";
 import { extend } from "lodash";
@@ -67,35 +68,35 @@ export default class Chat extends Component {
 
   render() {
     return (
-      <div className={ultilities.topBottomContainer}>
-        <Typography align="center" variant="h5">
-          Chat
-        </Typography>
-        <ChatLog chatLog={this.props.chatLog} />
-        <div className={ultilities.bottomElement}>
-          <Grid container spacing={1}>
-            <Grid item xs={10}>
-              <FormControl>
-                <TextField
-                  label="Message"
-                  value={this.state.message}
-                  onKeyDown={(e) => this.onKeyDown(e)}
-                  onChange={(e) => this.onTypeMessage(e)}
-                  fullWidth={true}
-                ></TextField>
-                <FormHelperText id="my-helper-text">
-                  Type your message here.
-                </FormHelperText>
-              </FormControl>
+        <div className={ultilities.topBottomContainer}>
+          <Typography align="center" variant="h5">
+            Chat
+          </Typography>
+          <ChatLog chatLog={this.props.chatLog} />
+          <div className={ultilities.bottomElement}>
+            <Grid container spacing={1} style={{"margin-left":"20px"}}>
+              <Grid item xs={7}>
+                <FormControl>
+                  <TextField
+                    label="Message"
+                    value={this.state.message}
+                    onKeyDown={(e) => this.onKeyDown(e)}
+                    onChange={(e) => this.onTypeMessage(e)}
+                    fullWidth={true}
+                  ></TextField>
+                  <FormHelperText id="my-helper-text">
+                    Type your message here.
+                  </FormHelperText>
+                </FormControl>
+              </Grid>
+              <Grid item xs={2}>
+                <Button color="primary" onClick={() => this.onSendingMessage()}>
+                  Send
+                </Button>
+              </Grid>
             </Grid>
-            <Grid item xs={2}>
-              <Button color="primary" onClick={() => this.onSendingMessage()}>
-                Send
-              </Button>
-            </Grid>
-          </Grid>
+          </div>
         </div>
-      </div>
     );
   }
 }
